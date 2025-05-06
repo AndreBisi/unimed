@@ -1,0 +1,125 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  BorderStyle = bsSingle
+  Caption = 'Gambi arquivo xml'
+  ClientHeight = 626
+  ClientWidth = 645
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 82
+    Top = 32
+    Width = 66
+    Height = 13
+    Caption = 'Arquivo XML :'
+  end
+  object Label2: TLabel
+    Left = 8
+    Top = 104
+    Width = 31
+    Height = 13
+    Caption = 'Label2'
+  end
+  object Label3: TLabel
+    Left = 8
+    Top = 120
+    Width = 31
+    Height = 13
+    Caption = 'Label2'
+  end
+  object edtArquivo: TJvFilenameEdit
+    Left = 154
+    Top = 29
+    Width = 409
+    Height = 21
+    Filter = 'All files (*.XML)|*.XML'
+    TabOrder = 0
+    Text = '"C:\Publico\xml_analitico_3988 com desconto.xml"'
+  end
+  object BitBtn1: TBitBtn
+    Left = 82
+    Top = 72
+    Width = 481
+    Height = 25
+    Caption = 'Iniciar'
+    TabOrder = 1
+    OnClick = BitBtn1Click
+  end
+  object Memo1: TMemo
+    Left = 0
+    Top = 152
+    Width = 645
+    Height = 474
+    Align = alBottom
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Lines.Strings = (
+      'Memo1')
+    ScrollBars = ssBoth
+    TabOrder = 2
+  end
+  object FDPhysPgDriverLink1: TFDPhysPgDriverLink
+    VendorHome = 'C:\AGBSoft\projetosOficiais\SisGerencialNET\fonte\Win32\Debug'
+    Left = 32
+    Top = 120
+  end
+  object FDGUIxWaitCursor1: TFDGUIxWaitCursor
+    Provider = 'Forms'
+    Left = 32
+    Top = 160
+  end
+  object conexao: TFDConnection
+    Params.Strings = (
+      'Database=DBUnimed'
+      'User_Name=postgres'
+      'Password=porcos128'
+      'Server=192.168.14.2'
+      'DriverID=PG')
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    Connected = True
+    LoginPrompt = False
+    Left = 32
+    Top = 224
+  end
+  object qryBusca: TFDQuery
+    Connection = conexao
+    SQL.Strings = (
+      
+        'SELECT GUITE_VAL_INFORM_HONOR + GUITE_VAL_INFORM_FILME + GUITE_V' +
+        'AL_INFORM_CO AS VALOR'
+      'FROM TBCLINICAIMAGEM'
+      'WHERE GUIA_COD = :GUIA_COD'
+      '  AND ITEM_COD = :ITEM_COD')
+    Left = 136
+    Top = 120
+    ParamData = <
+      item
+        Name = 'GUIA_COD'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
+      end
+      item
+        Name = 'ITEM_COD'
+        DataType = ftString
+        ParamType = ptInput
+        Value = Null
+      end>
+    object qryBuscavalor: TFMTBCDField
+      AutoGenerateValue = arDefault
+      FieldName = 'valor'
+      Origin = 'valor'
+      ReadOnly = True
+      Precision = 64
+      Size = 0
+    end
+  end
+end

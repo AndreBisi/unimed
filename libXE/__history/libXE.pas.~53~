@@ -1,0 +1,1169 @@
+﻿unit libXE;
+
+interface
+
+uses
+  Vcl.Forms, Vcl.StdCtrls, Buttons, Data.DB, Vcl.DBCtrls, Vcl.ExtCtrls, TypInfo, sysUtils, Vcl.Mask,
+  uADStanIntf, uADStanOption, uADStanParam, uADStanError, uADDatSManager,
+  uADPhysIntf, uADDAptIntf, uADStanAsync, uADDAptManager, uADCompDataSet,
+  uADCompClient, JvExMask, JvToolEdit, JvBaseEdits, System.Classes, Variants, Winsock, jvComCtrls;
+
+  procedure desabilitaCampo( pForm : TForm );
+  procedure habilitaCampo( pForm : TForm );
+  procedure limpaCampo( pForm : TForm );
+  procedure controlaBotao( pForm : TForm; pBotao : TBitBtn; pNumReg : Integer );
+  procedure CopyObject(Source, Dest: TObject);
+  procedure TamanhoCampo( Form : Tform; Query : tadQuery );
+  procedure MostraDadosGeralQry( Form : Tform; Query : TADQuery );
+
+  Function MostraCombo( pCombo : TComboBox; pDado : String; pNaoAchou : Integer ) : Integer;
+  function RemoveAcento( Texto : String ) : String;
+  Function OnlyDigit( Num : String ) : String;
+  Function OnlyChar( Texto : String ) : String;
+  Function ValidaCPF(Num: String) : Boolean;
+  Function MostraComboDelimitado( Form : TForm; Combo : TComboBox; Dado : String; NaoAchou, Inicio, Final : Integer ) : Integer;
+  Function ValidaCNPJ(Num: String) : Boolean;
+  Function CompletaEspacoDireita( Texto : String; Qtd : Integer ) : String;
+  function completaEspacoEsquerda( Texto : String; Qtd : Integer ) : String;
+  function tipoField( pForm : tForm; pQuery : TADQuery; pField : String ) : TFieldType;
+  Function ValidaCartaoUnimed( Texto: String ) : Boolean;
+  function DataValida( pData : String ) : Boolean;
+  Function CalculaIdade( DataIni, DataFim : TDateTime ) : string;
+  function UltimoDiaMes(Mdt: TDateTime) : TDateTime;
+  Function AcrescentarAno( Data : TDateTime; Ano : Integer ) : String;
+  Function AcrescentarMes( pData : TDateTime; pMes : Integer ) : String;
+  Function AnoBiSexto( Ano: Integer): Boolean;
+  function DataExtenso( pData : TDateTime ) : String;
+  Function NumeroExtensoM(Texto : string) : string;
+  Function PreparaExtenso(Texto : string) : string;
+  Function TiraPonto(Texto : string) : string;
+  Function VirgulaPonto(Texto : string) : string;
+  function EnDecryptString( StrValue : String ) : String;
+  Function CompletaZeroEsq(Texto : string; Qtd : integer) : string;
+  Function GetIP:string;
+  Function TrocaCaracter(pTexto : string; pTira : string; pColoca : string) : string;
+
+implementation
+
+procedure desabilitaCampo( pForm : TForm );
+var
+  i : integer;
+begin
+  for i := 1 to pForm.ComponentCount - 1 do
+  begin
+    if ( pForm.Components[i] is TEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TEdit( pForm.Components[i] ).Enabled := False
+    else
+    if ( pForm.Components[i] is TComboBox ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TComboBox( pForm.Components[i] ).Enabled := False
+    else
+    if ( pForm.Components[i] is TMemo ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TMemo( pForm.Components[i] ).Enabled := False
+    else
+    if ( pForm.Components[i] is TRadioButton ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TRadioButton( pForm.Components[i] ).Enabled := False
+    else
+    if ( pForm.Components[i] is TCheckBox ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TCheckBox( pForm.Components[i] ).Enabled := False
+    else
+    if ( pForm.Components[i] is TJvComboEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TJvComboEdit( pForm.Components[i] ).Enabled := False
+    else
+    if ( pForm.Components[i] is TMaskEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TMaskEdit( pForm.Components[i] ).Enabled := False;
+  end;
+end;
+
+procedure habilitaCampo( pForm : TForm );
+var
+  i : integer;
+begin
+{********** controles **********
+  tag
+  0 - Limpa e desabilita
+  1 - Somente limpa
+  2 - Somente desabilita
+  3 - Não faz nada
+ *******************************}
+  for i := 1 to pForm.ComponentCount - 1 do
+  begin
+    if ( pForm.Components[i] is TEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TEdit( pForm.Components[i] ).Enabled := True
+    else
+    if ( pForm.Components[i] is TComboBox ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TComboBox( pForm.Components[i] ).Enabled := True
+    else
+    if ( pForm.Components[i] is TMemo ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TMemo( pForm.Components[i] ).Enabled := True
+    else
+    if ( pForm.Components[i] is TRadioButton ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TRadioButton( pForm.Components[i] ).Enabled := True
+    else
+    if ( pForm.Components[i] is TCheckBox ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TCheckBox( pForm.Components[i] ).Enabled := True
+    else
+    if ( pForm.Components[i] is TJvComboEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TJvComboEdit( pForm.Components[i] ).Enabled := True
+    else
+    if ( pForm.Components[i] is TMaskEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 2 ) ) then
+    TMaskEdit( pForm.Components[i] ).Enabled := True;
+  end;
+end;
+
+procedure limpaCampo( pForm : TForm );
+var
+  i : integer;
+begin
+  for i := 1 to pForm.ComponentCount - 1 do
+  begin
+    if ( pForm.Components[i] is TEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TEdit( pForm.Components[i] ).Clear
+    else
+    if ( pForm.Components[i] is TComboBox ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TComboBox( pForm.Components[i] ).ItemIndex := -1
+    else
+    if ( pForm.Components[i] is TMemo ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TMemo( pForm.Components[i] ).Lines.Clear
+    else
+    if ( pForm.Components[i] is TCheckBox ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TCheckBox( pForm.Components[i] ).Checked := False
+    else
+    if ( pForm.Components[i] is TMaskEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TMaskEdit( pForm.Components[i] ).Clear
+    else
+    if ( pForm.Components[i] is TPanel ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TPanel( pForm.Components[i] ).Caption := ''
+    else
+    if ( pForm.Components[i] is TJvDateEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TJvDateEdit( pForm.Components[i] ).Clear
+    else
+    if ( pForm.Components[i] is TJvComboEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TJvComboEdit( pForm.Components[i] ).Clear
+    else
+    if ( pForm.Components[i] is TJvCalcEdit ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TJvCalcEdit( pForm.Components[i] ).Clear
+    else
+    if ( pForm.Components[i] is TJvIPAddress ) and ( ( pForm.Components[i].Tag = 0 ) or ( pForm.Components[i].Tag = 1 ) ) then
+    TJvIPAddress( pForm.Components[i] ).Text := '';
+  end;
+end;
+
+Function MostraCombo( pCombo : TComboBox; pDado : String; pNaoAchou : Integer ) : Integer;
+var
+  ComboAux : TComboBox;
+  i        : integer;
+  Achou    : Boolean;
+
+begin
+  ComboAux           := TComboBox.Create( nil );
+  ComboAux           := TComboBox( pCombo );
+  Achou              := False;
+  ComboAux.ItemIndex := 0;
+
+  for i := 0 to ( ComboAux.Items.Count - 1 ) do
+  begin
+    if ( ComboAux.Text = pDado ) and ( Achou = False ) then
+    begin
+      Achou := True;
+      Result := i;
+      Exit;
+    end;
+    ComboAux.ItemIndex := i + 1;
+  end;
+  if not Achou then
+  Result := pNaoAchou;
+end;
+
+procedure controlaBotao( pForm : TForm; pBotao : TBitBtn; pNumReg : Integer );
+var
+  NumComp,
+  ContComp : Integer;
+  TipoCon  : Char;
+
+Begin
+  if ( pBotao.Name = 'btnNovo' ) or ( pBotao.Name = 'btnEditar' ) then
+  begin
+    for ContComp := 1 to pForm.ComponentCount - 1 do
+    begin
+      if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnNovo' )      or
+                                                         ( pForm.Components[ContComp].Name = 'btnPesquisar' ) or
+                                                         ( pForm.Components[ContComp].Name = 'btnEditar' )    or
+                                                         ( pForm.Components[ContComp].Name = 'btnExcluir' )   or
+                                                         ( pForm.Components[ContComp].Name = 'btnImprimir' )  or
+                                                         ( pForm.Components[ContComp].Name = 'btnSair' ) )    then
+      TBitBtn( pForm.Components[ContComp] ).Enabled := False
+      else
+      if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnGravar' )     or
+                                                         ( pForm.Components[ContComp].Name = 'btnCancelar' ) ) then
+      TBitBtn( pForm.Components[ContComp] ).Enabled := True
+      else
+      if ( pForm.Components[ContComp] is TDBNavigator ) then
+      TDBNavigator( pForm.Components[ContComp] ).Enabled := False;
+    end;
+  end
+  else
+  if ( pBotao.Name = 'btnGravar' ) or ( pBotao.Name = 'btnCancelar' ) or ( pBotao.Name = 'btnPesquisar' ) or ( pBotao.Name = 'btnExcluir' ) or ( pBotao.Name = 'btnPesquisar' ) then
+  begin
+    for ContComp := 1 to pForm.ComponentCount - 1 do
+    begin
+      if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnGravar' )     or
+                                                          ( pForm.Components[ContComp].Name = 'btnCancelar' ) ) then
+
+      TBitBtn( pForm.Components[ContComp] ).Enabled := False
+      else
+      if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnNovo' )      or
+                                                          ( pForm.Components[ContComp].Name = 'btnPesquisar' ) or
+                                                          ( pForm.Components[ContComp].Name = 'btnImprimir' )  or
+                                                          ( pForm.Components[ContComp].Name = 'btnSair' ) )    then
+      TBitBtn( pForm.Components[ContComp] ).Enabled := True
+      else
+      if ( pForm.Components[ContComp] is TDBNavigator ) then
+      TDBNavigator( pForm.Components[ContComp] ).Enabled := True;
+
+      if ( pNumReg > 0 ) then
+      begin
+        if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnEditar' ) or
+                                                            ( pForm.Components[ContComp].Name = 'btnExcluir' ) ) then
+        TBitBtn( pForm.Components[ContComp] ).Enabled := True;
+      end
+      else
+      begin
+        if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnEditar' ) or
+                                                            ( pForm.Components[ContComp].Name = 'btnExcluir' ) ) then
+        TBitBtn( pForm.Components[ContComp] ).Enabled := False;
+      end;
+
+      if ( pBotao.Name = 'btnPesquisar' ) and ( pForm.Components[ContComp] is TBitBtn ) and ( pForm.Components[ContComp].Name = 'btnPesquisar' ) then
+      TBitBtn( pForm.Components[ContComp] ).Enabled := False;
+    end;
+  end
+
+  else
+  if ( pBotao.Name = 'btnImprimir' ) then
+  begin
+    for ContComp := 1 to pForm.ComponentCount - 1 do
+    begin
+      if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnNovo' )      or
+                                                         ( pForm.Components[ContComp].Name = 'btnPesquisar' ) or
+                                                         ( pForm.Components[ContComp].Name = 'btnEditar' )    or
+                                                         ( pForm.Components[ContComp].Name = 'btnExcluir' )   or
+                                                         ( pForm.Components[ContComp].Name = 'btnGravar' )  or
+                                                         ( pForm.Components[ContComp].Name = 'btnSair' ) )    then
+      TBitBtn( pForm.Components[ContComp] ).Enabled := False
+      else
+      if ( pForm.Components[ContComp] is TBitBtn ) and ( ( pForm.Components[ContComp].Name = 'btnImprimir' )     or
+                                                         ( pForm.Components[ContComp].Name = 'btnCancelar' ) ) then
+      TBitBtn( pForm.Components[ContComp] ).Enabled := True
+      else
+      if ( pForm.Components[ContComp] is TDBNavigator ) then
+      TDBNavigator( pForm.Components[ContComp] ).Enabled := False;
+    end;
+  end;
+end;
+
+function RemoveAcento( Texto : String ) : String;
+const
+  ComAcento = 'àâêôûãõáéíóúçüÀÂÊÔÛÃÕÁÉÍÓÚÇÜ';
+  SemAcento = 'aaeouaoaeioucuAAEOUAOAEIOUCU';
+
+var
+   x: Integer;
+
+begin;
+  for x := 1 to Length(Texto) do
+  if Pos(Texto[x],ComAcento) <> 0 then
+  Texto[x] := SemAcento[Pos(Texto[x], ComAcento)];
+
+  Result := Texto;
+end;
+
+Function OnlyDigit( Num : String ) : String;
+var
+  Numero : String;
+  i      : Integer;
+begin
+  Numero := '';
+  for i := 1 to Length( Num ) do
+  if Num[i] in ['0'..'9'] then
+  Numero := Numero + Num[i];
+
+  Result := Numero;
+end;
+
+Function OnlyChar( Texto : string ) : string;
+var
+  N : integer;
+
+begin
+  for N := 1 to length( Texto ) do
+  begin
+    if Copy( Texto, N, 1 ) = '1' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '2' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '3' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '4' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '5' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '6' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '7' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '8' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '9' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end
+    else
+    if Copy( Texto, N, 1 ) = '0' then
+    begin
+      Delete( Texto, N, 1 );
+      Insert( ' ', Texto, N );
+    end;
+  end;
+  Result := Texto;
+end;
+
+procedure CopyObject(Source, Dest: TObject);
+var
+  TypInfo      : PTypeInfo;
+  PropList     : TPropList;
+  PropCount, i : integer;
+  Value        : variant;
+begin
+  TypInfo   := Source.ClassInfo;
+  PropCount := GetPropList( TypInfo, tkAny, @PropList );
+
+  for i := 0 to PropCount - 1 do
+  begin
+    if ( PropList[i]^.SetProc <> nil ) then
+    begin
+      Value := GetPropValue(Source, PropList[i]^.Name);
+      SetPropValue(Dest, PropList[i]^.Name, Value);
+    end;
+  end;
+end;
+
+Function ValidaCPF(Num: String): Boolean;
+var
+  Temp: Integer;
+  Numero: String;
+  n: array [1..9] of Integer;
+  d: array [1..2] of Integer;
+begin
+  Numero:='';
+  for Temp := 1 to 14 do
+  if Num[Temp] in ['0'..'9'] then
+  Numero := Numero + Num[Temp];
+
+  for Temp := 1 to 9 do
+  n[Temp] := StrToInt( Numero[Temp] );
+  d[1] := n[9] * 2 + n[8] * 3 + n[7] * 4 + n[6] * 5 + n[5] * 6 + n[4] * 7 + n[3] * 8 + n[2] * 9 + n[1] * 10;
+  d[1] := 11 - ( d[1] mod 11 );
+  if d[1] >= 10 then
+  d[1] := 0;
+  d[2] := d[1] * 2 + n[9] * 3 + n[8] * 4 + n[7] * 5 + n[6] * 6 + n[5] * 7 + n[4] * 8 + n[3] * 9 + n[2] * 10 + n[1] * 11;
+  d[2] := 11 - ( d[2] mod 11 );
+  if d[2] >= 10 then
+  d[2] := 0;
+  if IntToStr( d[1] )+ IntToStr( d[2] ) = Numero[10] + Numero[11] then
+  ValidaCPF := True
+  else
+  ValidaCPF := False;
+end;
+
+Function MostraComboDelimitado( Form : TForm; Combo : TComboBox; Dado : String; NaoAchou, Inicio, Final : Integer ) : Integer;
+var
+  ComboAux : TComboBox;
+  i        : integer;
+  Achou    : Boolean;
+
+begin
+  ComboAux := TComboBox.Create( nil );
+  ComboAux           := TComboBox( Combo );
+  Achou              := False;
+  ComboAux.ItemIndex := 0;
+
+  for i := 0 to ( ComboAux.Items.Count - 1 ) do
+  begin
+    if ( Copy( ComboAux.Text, Inicio, Final ) = Dado ) and ( Achou = False ) then
+    begin
+      Achou := True;
+      Result := i;
+      Exit;
+    end;
+    ComboAux.ItemIndex := i + 1;
+  end;
+  if not Achou then
+  Result := NaoAchou;
+end;
+
+Function ValidaCNPJ(Num: String): Boolean;
+var
+  Temp: Integer;
+  Numero: String;
+  n: array [1..12] of Integer;
+  d: array [1..2] of Integer;
+begin
+  Numero := '';
+  for Temp := 1 to 18 do
+  if Num[Temp] in ['0'..'9'] then
+  Numero := Numero + Num[Temp];
+  for Temp := 1 to 12 do
+  n[Temp] := StrToInt( Numero[Temp] );
+  d[1]:= n[12] * 2 + n[11] * 3 + n[10] * 4 + n[9] * 5 + n[8] * 6 + n[7] * 7 + n[6] * 8 + n[5] * 9 + n[4] * 2 +
+         n[3] * 3 + n[2] * 4 + n[1] * 5;
+  d[1] := 11 - ( d[1] mod 11 );
+  if d[1] >= 10 then
+  d[1] := 0;
+  d[2] := d[1] * 2 + n[12] * 3 + n[11] * 4 + n[10] * 5 + n[9] * 6 + n[8] * 7 + n[7] * 8 + n[6] * 9 + n[5] * 2 +
+          n[4] * 3 + n[3] * 4 + n[2] * 5 + n[1] * 6;
+  d[2] := 11 - ( d[2] mod 11 );
+  if d[2] >= 10 then
+  d[2] := 0;
+  if IntToStr( d[1]) + IntToStr( d[2] ) = Numero[13] + Numero[14]
+  then
+  ValidaCNPJ := True
+  else
+  ValidaCNPJ := False;
+end;
+
+Function CompletaEspacoDireita(texto : string; qtd : integer) : string;
+var
+  Tamanho,I : integer;
+  TextoRet  : String;
+
+begin
+  Tamanho := Length(Texto);
+
+  if Tamanho > Qtd then
+  Result := Copy( Texto, 1, Qtd )
+  else
+  begin
+    for I := 1 to (Qtd - Tamanho) do
+    begin
+      TextoRet := TextoRet + ' ';
+    end;
+    Result := Texto + TextoRet;
+  end;
+end;
+
+Function CompletaEspacoEsquerda(texto : string; qtd : integer) : string;
+var
+  Tamanho,I : integer;
+  TextoRet  : String;
+
+begin
+  Tamanho := Length(Texto);
+
+  if Tamanho > Qtd then
+  Result := Copy( Texto, 1, Qtd )
+  else
+  begin
+    for I := 1 to (Qtd - Tamanho) do
+    begin
+      TextoRet := TextoRet + ' ';
+    end;
+    Result := TextoRet + Texto;
+  end;
+end;
+
+Procedure TamanhoCampo( Form : Tform; Query : TADQuery );
+var
+  i, j : Integer;
+  vCampo : String;
+
+begin
+  for i := 1 to Query.FieldCount do
+  begin
+    vCampo := LowerCase( ( Copy( Query.Fields[ i - 1 ].Name, ( Length( Query.Name ) + 1 ), ( Length( Query.Fields[ i - 1 ].Name ) - Length( Query.Name ) ) ) ) );
+
+    for j := 0 to Form.ComponentCount - 1 do
+    begin
+      if ( Form.Components[j] is TEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+      TEdit( Form.Components[j] ).MaxLength := Query.fieldByName( vCampo ).Size
+      else
+      if ( Form.Components[j] is TjvComboEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+      TjvComboEdit( Form.Components[j] ).MaxLength := Query.fieldByName( vCampo ).Size
+      else
+      if ( Form.Components[j] is TMemo ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+      TMemo( Form.Components[j] ).MaxLength := Query.fieldByName( vCampo ).Size;
+      {else
+      if ( Form.Components[j] is TJvCalcEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+      TJvCalcEdit( Form.Components[j] ).MaxLength := Query.fieldByName( vCampo ).Size + Query.FieldByName( vCampo ).Precision;}
+    end;
+  end;
+end;
+
+function tipoField( pForm : tForm; pQuery : TADQuery; pField : String ) : TFieldType;
+var
+  NumComp,
+  ContComp : Integer;
+  Achou : Boolean;
+
+begin
+  Achou := False;
+
+  if pos( 'cast', pField ) > 0 then
+  Result := ftstring
+  else
+  begin
+    if pos( '.', pField ) > 0 then
+    begin
+      pField := copy( pField, pos( '.', pField ) + 1, length( pField ) );
+    end;
+
+    for ContComp := 0 to pForm.ComponentCount - 1 do
+    begin
+      if ( pForm.Components[ContComp] is TADQuery ) and ( pForm.Components[ContComp].Name = 'qryPesquisa' ) then
+      begin
+        with TADQuery( pForm.Components[ContComp] ) do
+        begin
+          Result := FieldByname( pField ).DataType;
+          Achou  := True;
+        end;
+      end;
+    end;
+
+    if Result = ftFMTBcd then
+    Result := ftFloat;
+  end;
+end;
+
+Procedure MostraDadosGeralQry( Form : Tform; Query : TADQuery );
+var
+  i, j : Integer;
+  vCampo : String;
+
+begin
+  if Query.RecordCount > 0 then
+  begin
+    for i := 1 to Query.FieldCount do
+    begin
+      vCampo := LowerCase( ( Copy( Query.Fields[ i - 1 ].Name, ( Length( Query.Name ) + 1 ),
+                ( Length( Query.Fields[ i - 1 ].Name ) - Length( Query.Name ) ) ) ) );
+
+      for j := 0 to Form.ComponentCount - 1 do
+      begin
+        if ( Form.Components[j] is TEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        TEdit( Form.Components[j] ).Text := Query.fieldByName( vCampo ).Text
+        else
+        if ( Form.Components[j] is TPanel ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        begin
+          if TPanel( Form.Components[j] ).Alignment = taLeftJustify then
+          TPanel( Form.Components[j] ).Caption := ' ' + Query.fieldByName( vCampo ).Text
+          else
+          TPanel( Form.Components[j] ).Caption := Query.fieldByName( vCampo ).Text;
+        end
+        else
+        if ( Form.Components[j] is TMaskEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        TMaskEdit( Form.Components[j] ).Text := Query.fieldByName( vCampo ).Text
+        else
+        if ( Form.Components[j] is TCheckBox ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        TCheckBox( Form.Components[j] ).Checked := Query.fieldByName( vCampo ).Value
+        else
+        if ( Form.Components[j] is TComboBox ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        begin
+          if Query.fieldByName( vCampo ).Value <> Null then
+          TComboBox( Form.Components[j] ).ItemIndex := MostraComboDelimitado( Form, TComboBox( Form.Components[j] ),
+                                                                              Query.fieldByName( vCampo ).Value, -1 , 1,
+                                                                              Query.fieldByName( vCampo ).Size )
+          else
+          TComboBox( Form.Components[j] ).ItemIndex := -1;
+        end
+        else
+        if ( Form.Components[j] is TjvComboEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        TjvComboEdit( Form.Components[j] ).Text := Query.fieldByName( vCampo ).Text
+        else
+        if ( Form.Components[j] is TJvDateEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        begin
+           if ( Query.fieldByName( vCampo ).Text <> '' ) then
+           TJvDateEdit( Form.Components[j] ).Date := Query.fieldByName( vCampo ).AsDateTime
+           else
+           TJvDateEdit( Form.Components[j] ).Clear;
+        end
+        else
+        if ( Form.Components[j] is TMemo ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        begin
+          if Query.fieldByName( vCampo ).Value <> Null then
+          TMemo( Form.Components[j] ).Text := Query.fieldByName( vCampo ).Value
+          else
+          TMemo( Form.Components[j] ).Text := '';
+        end
+        else
+        if ( Form.Components[j] is TJvCalcEdit ) and ( ( LowerCase( Form.Components[j].Name ) = 'field' + vCampo ) ) then
+        TJvCalcEdit( Form.Components[j] ).Value := Query.fieldByName( vCampo ).Value;
+      end;
+    end;
+  end;
+end;
+
+Function ValidaCartaoUnimed( Texto: String ) : Boolean;
+var
+  Valores : array[ 1..16 ] of Integer;
+  i, vSoma, vDigito : Integer;
+
+begin
+  vSoma   := 0;
+  vDigito := 0;
+
+  for I := 1 to 16 do
+  begin
+    Valores[ i ] := StrToInt( Copy( Texto, i, 1 ) );
+  end;
+
+  Valores[1]  := Valores[1] * 9;
+  Valores[2]  := Valores[2] * 8;
+  Valores[3]  := Valores[3] * 7;
+  Valores[4]  := Valores[4] * 6;
+  Valores[5]  := Valores[5] * 5;
+  Valores[6]  := Valores[6] * 4;
+  Valores[7]  := Valores[7] * 3;
+  Valores[8]  := Valores[8] * 2;
+  Valores[9]  := Valores[9] * 9;
+  Valores[10] := Valores[10] * 8;
+  Valores[11] := Valores[11] * 7;
+  Valores[12] := Valores[12] * 6;
+  Valores[13] := Valores[13] * 5;
+  Valores[14] := Valores[14] * 4;
+  Valores[15] := Valores[15] * 3;
+  Valores[16] := Valores[16] * 2;
+
+  for I := 1 to 16 do
+  begin
+    vSoma := vSoma + Valores[i];
+  end;
+
+  vDigito := 11 - ( vSoma mod 11 );
+
+  if vDigito >= 10 then
+  vDigito := 0;
+
+  if vDigito = StrToInt( Copy( Texto, 17, 1 ) ) then
+  Result := True
+  else
+  Result := False;
+end;
+
+function DataValida( pData : String ) : Boolean;
+begin
+  Result := True;
+  try
+    StrToDate( pData );
+  except
+  on EConvertError do
+    Result := False;
+  end;
+end;
+
+Function CalculaIdade( DataIni, DataFim : TDateTime ) : string;
+var
+  Idade : String;
+  Resto : Integer;
+  iDia, iMes, iAno, fDia, fMes, fAno : Word;
+  nDia, nMes, nAno, DiaBissexto : Double;
+begin
+  DecodeDate( DataIni, iAno, iMes, iDia);
+  DecodeDate( DataFim, fAno, fMes, fDia);
+  nAno := fAno - iAno;
+  if nAno > 0 then
+  if fMes < iMes then
+  nAno := nAno - 1
+  else
+  if( fMes = iMes ) and ( fDia < iDia ) then
+  nAno := nAno - 1;
+
+  if fMes < iMes then
+  begin
+    nMes := 12 - (iMes-fMes);
+    if fDia < iDia then
+    nMes := nMes - 1;
+  end
+  else if fMes = iMes then
+  begin
+    nMes := 0;
+    if fDia < iDia then
+    nMes := 11;
+  end
+  else
+  if fMes > iMes then
+  begin
+    nMes := fMes - iMes;
+    if fDia < iDia then
+    nMes := nMes - 1;
+  end;
+  nDia := 0;
+
+  if fDia > iDia then
+  nDia := fDia - iDia;
+  if fDia < iDia then
+  nDia := (DataFim-IncMonth(DataFim,-1))-(iDia-fDia);
+  Result := '';
+  if nAno = 1 then
+  Result := FloatToStr(nAno)+ ' Ano '
+  else
+  if nAno > 1 then
+  Result := FloatToStr(nAno)+ ' Anos ';
+
+  if nAno = 0 then
+  begin
+    if nMes = 1 then
+    Result := Result + FloatToStr(nMes)+ ' Mês '
+    else
+    if nMes > 1 then
+    Result := Result + FloatToStr(nMes)+ ' Meses ';
+
+    if nMes = 0 then
+    begin
+      if nDia = 1 then
+      Result := Result + FloatToStr(nDia)+ ' Dia '
+      else
+      if nDia > 1 then
+      Result := Result + FloatToStr(nDia)+ ' Dias ';
+    end;
+  end;
+end;
+
+function UltimoDiaMes(Mdt: TDateTime) : TDateTime;
+var
+  ano, mes, dia : word;
+  mDtTemp : TDateTime;
+  
+begin
+  Decodedate(mDt, ano, mes, dia);
+  mDtTemp := (mDt - dia) + 33;
+  Decodedate(mDtTemp, ano, mes, dia);
+  Result := mDtTemp - dia;
+end;
+
+Function AcrescentarAno( Data : TDateTime; Ano : Integer ) : String;
+begin
+  if ( Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 4, 2 ) = '02' ) and
+     ( Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 1, 2 ) = '29' ) then
+  begin
+    if AnoBiSexto( StrToInt( Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 7, 4 ) ) + Ano ) then
+    Result := Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 1, 6 ) +
+              IntToStr( StrToInt( Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 7, 4 ) ) + Ano )
+    else
+    Result := '01/03/' + IntToStr( StrToInt( Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 7, 4 ) ) + Ano );
+  end
+  else
+  Result := Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 1, 6 ) +
+          IntToStr( StrToInt( Copy( FormatDateTime( 'dd/mm/yyyy', Data ), 7, 4 ) ) + Ano );
+
+  Result := FormatDateTime( 'dd/mm/yyyy', StrToDate( Result ) );
+end;
+
+Function AcrescentarMes( pData : TDateTime; pMes : Integer ) : String;
+var I, Meses               : Integer;
+    Ano, Mes, Dia, DiaFixo : Word;
+    Data : TDateTime;
+begin
+   Data  := pData;
+   Meses := pMes;
+   DecodeDate( Data, Ano, Mes, Dia );
+   DiaFixo := Dia;
+   for i := 1 to Meses do
+     begin
+       DecodeDate( Data + ( 32 - Dia ), Ano, Mes, Dia );
+       Data := EncodeDate( Ano, Mes, 01 );
+       Dia  := 01;
+     end;
+   DecodeDate( Data + ( DiaFixo - Dia ), Ano, Mes, Dia );
+   Data := EncodeDate( Ano, Mes, Dia );
+   Result := FormatDateTime( 'dd/mm/yyyy', Data );
+end;
+
+Function AnoBiSexto( Ano: Integer): Boolean;
+begin
+  Result := ( Ano mod 4 = 0 ) and ( ( Ano mod 100 <> 0 ) or ( Ano mod 400 = 0 ) );
+end;
+
+function DataExtenso( pData : TDateTime ) : String;
+begin
+  Result := '';
+  Result := Copy( FormatDateTime( 'dd/mm/yyyy', pData ),1, 2 ) + ' de ';
+  case StrToInt( Copy( FormatDateTime( 'dd/mm/yyyy', pData ),4, 2 ) ) of
+    1  : Result := Result + 'Janeiro de ';
+    2  : Result := Result + 'Fevereiro de ';
+    3  : Result := Result + 'Março de ';
+    4  : Result := Result + 'Abril de ';
+    5  : Result := Result + 'Maio de ';
+    6  : Result := Result + 'Junho de ';
+    7  : Result := Result + 'Julho de ';
+    8  : Result := Result + 'Agosto de ';
+    9  : Result := Result + 'Setembro de ';
+    10 : Result := Result + 'Outubro de ';
+    11 : Result := Result + 'Novembro de ';
+    12 : Result := Result + 'Dezembro de ';
+  end;
+
+  Result := Result + Copy( FormatDateTime( 'dd/mm/yyyy', pData ),7, 4 );
+end;
+
+Function NumeroExtensoM(Texto : string) : string;
+var
+  Extenso,
+  Unidade,
+  Mil,
+  Milhao,
+  Bilhao,
+  Centavo : string;
+  Cont,
+  I       : integer;
+
+begin
+  Centavo := Copy(Texto, (Length(Texto) - 1), 2);
+  Centavo := FormatFloat('000', StrToFloat(Centavo));
+  for I := 1 to 3 do
+    begin
+      Delete(Texto, (Length(Texto)), 1);
+    end;
+
+  Texto   := TiraPonto(Texto);
+  Texto   := Trim(Texto);
+  Texto   := FormatFloat('000000000000', StrToFloat(Texto));
+  Unidade := Copy(Texto, 10, 3);
+  Mil     := Copy(Texto, 7, 3);
+  Milhao  := Copy(Texto, 4, 3);
+  Bilhao  := Copy(Texto, 1, 3);
+
+//"999.###.###.###,##
+  if Bilhao > '000' then
+    begin
+      Extenso := PreparaExtenso(Bilhao);
+      if Bilhao = '001' then
+        Extenso := Extenso + ' Bilhão'
+      else
+        Extenso := Extenso + ' Bilhões';
+
+      if (Unidade > '000') or (Mil > '000') or (Milhao > '000') then
+        Extenso := Extenso + ' e '
+      else
+        Extenso := Extenso + ' de Reais';
+    end;
+
+//###."999".###.###,##
+  if Milhao > '000' then
+    begin
+      Extenso := Extenso + PreparaExtenso(Milhao);
+      if Milhao = '001' then
+        Extenso := Extenso + ' Milhão'
+      else
+        Extenso := Extenso + ' Milhões';
+
+      if (Unidade > '000') or (Mil > '000') then
+        Extenso := Extenso + ' e '
+      else
+        Extenso := Extenso + ' de Reais';
+    end;
+
+//###.###."999".###,##
+  if Mil > '000' then
+    begin
+      Extenso := Extenso + PreparaExtenso(Mil) + ' Mil';
+      if Unidade > '000' then
+        Extenso := Extenso + ' e '
+      else
+        Extenso := Extenso + ' Reais';
+    end;
+
+//###.###.###."999",##
+  if Unidade > '000' then
+    begin
+      Extenso := Extenso + PreparaExtenso(Unidade);
+      if Unidade = '001' then
+        Extenso := Extenso + ' Real'
+      else
+        Extenso := Extenso + ' Reais';
+    end;
+
+//###.###.###.###,99
+  if Centavo > '000' then
+    begin
+      if (Bilhao > '000') or (Milhao > '000') or (Mil > '000') or (Unidade > '000') then
+        Extenso := Extenso + ' e';
+
+      Extenso := Extenso + PreparaExtenso(Centavo);
+      if Centavo = '001' then
+        Extenso := Extenso + ' Centavo'
+      else
+        Extenso := Extenso + ' Centavos';
+    end;
+
+  Result := Trim(Extenso);
+end;
+
+Function PreparaExtenso(Texto : string) : string;
+var
+  Extenso : string;
+
+begin
+  if (Copy(Texto, 1, 1) = '1') then
+    begin
+      if (Copy(Texto, 2, 1) <> '0') or (Copy(Texto, 3, 1) <> '0') then
+        Extenso := 'Cento'
+      else if (Copy(Texto, 2, 1) = '0') and (Copy(Texto, 3, 1) = '0') then
+        Extenso := 'Cem';
+    end
+  else
+    begin
+      if Copy(Texto, 1, 1) = '2' then
+        Extenso := 'Duzentos'
+      else
+        if Copy(Texto, 1, 1) = '3' then
+          Extenso := 'Trezentos'
+      else
+        if Copy(Texto, 1, 1) = '4' then
+          Extenso := 'Quatrocentos'
+      else
+        if Copy(Texto, 1, 1) = '5' then
+          Extenso := 'Quinhentos'
+      else
+        if Copy(Texto, 1, 1) = '6' then
+          Extenso := 'Seiscentos'
+      else
+        if Copy(Texto, 1, 1) = '7' then
+          Extenso := 'Setecentos'
+      else
+        if Copy(Texto, 1, 1) = '8' then
+          Extenso := 'Oitocentos'
+      else
+        if Copy(Texto, 1, 1) = '9' then
+          Extenso := 'Novecentos';
+    end;
+
+  if (Copy(Texto, 1, 1) <> '0') and ((Copy(Texto, 2, 1) <> '0') or (Copy(Texto, 3, 1) <> '0')) then
+    Extenso := Extenso + ' e';
+
+  if Copy(Texto, 2, 1) = '1' then
+    begin
+      if Copy(Texto, 3, 1) = '0' then
+        Extenso := Extenso + ' Dez'
+      else
+        if Copy(Texto, 3, 1) = '1' then
+          Extenso := Extenso + ' Onze'
+      else
+        if Copy(Texto, 3, 1) = '2' then
+          Extenso := Extenso + ' Doze'
+      else
+        if Copy(Texto, 3, 1) = '3' then
+          Extenso := Extenso + ' Treze'
+      else
+        if Copy(Texto, 3, 1) = '4' then
+          Extenso := Extenso + ' Quatorze'
+      else
+        if Copy(Texto, 3, 1) = '5' then
+          Extenso := Extenso + ' Quinze'
+      else
+        if Copy(Texto, 3, 1) = '6' then
+          Extenso := Extenso + ' Dezesseis'
+      else
+        if Copy(Texto, 3, 1) = '7' then
+          Extenso := Extenso + ' Dezessete'
+      else
+        if Copy(Texto, 3, 1) = '8' then
+          Extenso := Extenso + ' Dezoito'
+      else
+        if Copy(Texto, 3, 1) = '9' then
+          Extenso := Extenso + ' Dezenove';
+    end
+
+  else
+    begin
+      if Copy(Texto, 2, 1) = '2' then
+        Extenso := Extenso + ' Vinte'
+      else
+        if Copy(Texto, 2, 1) = '3' then
+          Extenso := Extenso + ' Trinta'
+      else
+        if Copy(Texto, 2, 1) = '4' then
+          Extenso := Extenso + ' Quarenta'
+      else
+        if Copy(Texto, 2, 1) = '5' then
+          Extenso := Extenso + ' Cinquenta'
+      else
+        if Copy(Texto, 2, 1) = '6' then
+          Extenso := Extenso + ' Sessenta'
+      else
+        if Copy(Texto, 2, 1) = '7' then
+          Extenso := Extenso + ' Setenta'
+      else
+        if Copy(Texto, 2, 1) = '8' then
+          Extenso := Extenso + ' Oitenta'
+      else
+        if Copy(Texto, 2, 1) = '9' then
+          Extenso := Extenso + ' Noventa';
+
+      if (Copy(Texto, 1, 1) <> '0') and (Copy(Texto, 2, 1) <> '0') and (Copy(Texto, 3, 1) <> '0') then
+        Extenso := Extenso + ' e';
+
+      if Copy(Texto, 3, 1) <> '0' then
+        begin
+          if Copy(Texto, 3, 1) = '1' then
+            Extenso := Extenso + ' Um'
+          else
+          if Copy(Texto, 3, 1) = '2' then
+            Extenso := Extenso + ' Dois'
+          else
+          if Copy(Texto, 3, 1) = '2' then
+            Extenso := Extenso + ' Tres'
+          else
+          if Copy(Texto, 3, 1) = '4' then
+            Extenso := Extenso + ' Quatro'
+          else
+          if Copy(Texto, 3, 1) = '5' then
+            Extenso := Extenso + ' Cinco'
+          else
+          if Copy(Texto, 3, 1) = '6' then
+            Extenso := Extenso + ' Seis'
+          else
+          if Copy(Texto, 3, 1) = '7' then
+            Extenso := Extenso + ' Sete'
+          else
+          if Copy(Texto, 3, 1) = '8' then
+            Extenso := Extenso + ' Oito'
+          else
+          if Copy(Texto, 3, 1) = '9' then
+            Extenso := Extenso + ' Nove';
+        end;
+    end;
+  Result := Extenso;
+end;
+
+Function TiraPonto(Texto : string) : string;
+var
+  N : integer;
+
+begin
+  for N := 1 to length(Texto) do
+  begin
+    if Copy(Texto, N, 1) = '.' then
+      begin
+        Delete(Texto, N, 1);
+        Insert('', Texto, N);
+      end
+  end;
+  Result := Texto;
+end;
+
+Function VirgulaPonto(Texto : string) : string;
+var
+  N : integer;
+
+begin
+  for N := 1 to length(Texto) do
+  begin
+    if Copy(Texto, N, 1) = '.' then
+      begin
+        Delete(Texto, N, 1);
+        Insert('', Texto, N);
+      end
+    else
+      if Copy(Texto, N, 1) = ',' then
+        begin
+          Delete(Texto, N, 1);
+          Insert('.', Texto, N);
+        end;
+  end;
+  Result := Texto;
+end;
+
+function EnDecryptString( StrValue : String ) : String;
+var
+  I        : Integer;
+  OutValue : String;
+begin
+  OutValue := '';
+  for I := 1 to Length( StrValue ) do
+  OutValue := OutValue + char( Not( ord( StrValue[ I ] ) - 67199 ) );
+
+  Result := OutValue;
+end;
+
+//Completa uma string com zeros a esquerda...
+Function CompletaZeroEsq(texto : string; qtd : integer) : string;
+var
+  Tamanho,I : integer;
+  TextoRet  : String;
+
+begin
+  Tamanho := Length(Texto);
+  for I := 1 to (Qtd - Tamanho) do
+  begin
+    TextoRet := TextoRet + '0';
+  end;
+  Result := TextoRet + Texto;
+end;
+
+Function GetIP:string;
+var
+  WSAData: TWSAData;
+  HostEnt: PHostEnt;
+  Name: string;
+begin
+  WSAStartup( 2, WSAData );
+  SetLength(Name, 255);
+  Gethostname(PansiChar(Name), 255);
+  SetLength(Name, StrLen(PChar(Name)));
+  HostEnt := gethostbyname(PansiChar(Name));
+  with HostEnt^ do
+    Result:=Format('%d.%d.%d.%d',[Byte(h_addr^[0]),
+              Byte(h_addr^[1]),Byte(h_addr^[2]),Byte(h_addr^[3])]);
+  WSACleanup;
+end;
+
+Function TrocaCaracter(pTexto : string; pTira : string; pColoca : string) : string;
+var
+  N : integer;
+
+begin
+  for N := 1 to length(pTexto) do
+  begin
+    if Copy(pTexto, N, 1) = pTira then
+    begin
+      Delete(pTexto, N, 1);
+      Insert(pColoca, pTexto, N);
+    end;
+  end;
+  Result := pTexto;
+end;
+
+end.
+

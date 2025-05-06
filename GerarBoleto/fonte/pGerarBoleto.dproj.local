@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2017/09/04 07:56:45.000.500,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2017/09/21 17:18:48.000.677,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2017/09/21 17:21:51.000.135,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2017/10/06 11:12:07.000.744,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2017/10/06 11:15:35.000.056,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2017/10/06 11:47:26.000.711,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2017/10/06 12:28:35.000.906,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2018/04/03 15:56:38.000.452,=C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2018/04/03 15:57:00.000.304,C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.dfm=C:\AGBSoft\GerarBoleto\fonte\uPrincipal.dfm</Transaction>
+    <Transaction>2018/04/03 15:57:00.000.304,C:\Users\Unimed PC\Documents\RAD Studio\Projects\Unit1.pas=C:\AGBSoft\GerarBoleto\fonte\uPrincipal.pas</Transaction>
+    <Transaction>2018/04/03 15:57:05.000.263,C:\Users\Unimed PC\Documents\RAD Studio\Projects\Project1.dproj=C:\AGBSoft\GerarBoleto\fonte\pGerarBoleto.dproj</Transaction>
+    <Transaction>2018/04/03 17:23:34.000.556,=C:\AGBSoft\libXE\libXE.pas</Transaction>
+  </Transactions>
+</BorlandProject>

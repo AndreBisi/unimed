@@ -1,0 +1,27 @@
+#migrate TADQuery            -> TFDQuery
+#migrate TADConnection       -> TFDConnection
+#migrate TADGUIxWaitCursor   -> TFDGUIxWaitCursor
+#migrate TADPhysPgDriverLink -> TFDPhysPgDriverLink
+
+
+#migrate uADStanIntf   -> FireDAC.Stan.Intf,
+#migrate uADStanOption -> FireDAC.Stan.Option
+#migrate uADStanError  -> FireDAC.Stan.Error
+#migrate uADPhysIntf   -> FireDAC.Phys.Intf
+#migrate uADStanAsync  -> FireDAC.Stan.Async
+#migrate uADCompClient -> FireDAC.Comp.Client 
+#migrate uADStanDef    -> FireDAC.Stan.Def 
+#migrate uADStanPool   -> FireDAC.Stan.Pool 
+#migrate uADPhysPG     -> FireDAC.Phys.PG 
+
+
+#unuse uADStanParam
+#unuse uADDatSManager
+#unuse uADDAptIntf
+#unuse uADDAptManager
+#unuse uADCompDataSe
+#unuse uADGUIxIntf
+#unuse uADPhysManager
+#unuse uADGUIxFormsWait
+#unuse uADCompGUIx
+#unuse uADCompDataSet

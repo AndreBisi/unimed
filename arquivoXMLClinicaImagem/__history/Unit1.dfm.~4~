@@ -1,0 +1,46 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  BorderStyle = bsSingle
+  Caption = 'Gambi arquivo xml'
+  ClientHeight = 309
+  ClientWidth = 645
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 82
+    Top = 32
+    Width = 66
+    Height = 13
+    Caption = 'Arquivo XML :'
+  end
+  object edtArquivo: TJvFilenameEdit
+    Left = 154
+    Top = 29
+    Width = 409
+    Height = 21
+    Filter = 'All files (*.XML)|*.XML'
+    TabOrder = 0
+    Text = ''
+  end
+  object BitBtn1: TBitBtn
+    Left = 82
+    Top = 72
+    Width = 481
+    Height = 25
+    Caption = 'Iniciar'
+    TabOrder = 1
+    OnClick = BitBtn1Click
+  end
+  object FDConnection1: TFDConnection
+    Left = 400
+    Top = 192
+  end
+end

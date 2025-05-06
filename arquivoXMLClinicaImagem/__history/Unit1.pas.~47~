@@ -1,0 +1,173 @@
+unit Unit1;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons,
+  Vcl.Mask, JvExMask, JvToolEdit, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait,
+  Data.DB, FireDAC.Comp.Client, FireDAC.Phys.PGDef, FireDAC.Phys.PG,
+  FireDAC.Comp.UI, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf,
+  FireDAC.DApt, FireDAC.Comp.DataSet;
+
+type
+  TForm1 = class(TForm)
+    edtArquivo: TJvFilenameEdit;
+    Label1: TLabel;
+    BitBtn1: TBitBtn;
+    FDPhysPgDriverLink1: TFDPhysPgDriverLink;
+    FDGUIxWaitCursor1: TFDGUIxWaitCursor;
+    conexao: TFDConnection;
+    qryBusca: TFDQuery;
+    Memo1: TMemo;
+    Label2: TLabel;
+    Label3: TLabel;
+    FDQuery1: TFDQuery;
+    FMTBCDField1: TFMTBCDField;
+    qryBuscavalor_apres: TFMTBCDField;
+    qryBuscavalor_pag: TFMTBCDField;
+    procedure BitBtn1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    function ExtrairNumeros(const Texto: string): string;
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.BitBtn1Click(Sender: TObject);
+var
+  vArquivo : TStringList;
+  i        : Integer;
+  vGuia,
+  vProced,
+  vLinha   : string;
+  vValorProcedApres,
+  vValorGuiaApres,
+  vValorLoteApres,
+  vValorArquivoApres,
+  vValorProcedPag,
+  vValorGuiaPag,
+  vValorLotePag,
+  vValorArquivoPag : Real;
+  FormatSettings: TFormatSettings;
+
+begin
+  try
+    vArquivo := TStringList.Create;
+    FormatSettings := TFormatSettings.Create;
+    FormatSettings.DecimalSeparator := '.';
+    vArquivo.LoadFromFile( edtArquivo.FileName );
+    vGuia        := '';
+    vProced      := '';
+    vValorProcedApres  := 0;
+    vValorGuiaApres    := 0;
+    vValorLoteApres    := 0;
+    vValorArquivoApres := 0;
+    vValorProcedPag    := 0;
+    vValorGuiaPag      := 0;
+    vValorLotePag      := 0;
+    vValorArquivoPag   := 0;
+
+    Memo1.Lines.Clear;
+    Label2.Caption := '';
+    Label3.Caption := '';
+
+    for i := 0 to vArquivo.Count - 1 do
+    begin
+      Label2.Caption := 'Linha ' +
+                        IntToStr(i + 1) +
+                        ' de ' +
+                        IntToStr(vArquivo.Count);
+      vLinha := vArquivo.Strings[i];
+      Label3.Caption := vArquivo.Strings[i];
+
+      Label2.Refresh;
+      Label3.Refresh;
+
+      //pegar o numero da guia
+      if (Copy(Trim(vArquivo.Strings[i]), 1, 25) = '<ans:numeroGuiaOperadora>') then
+      begin
+        vGuia := ExtrairNumeros(vArquivo.Strings[i]);
+      end;
+
+      //pegar o codigo do procedimento
+      if (Copy(Trim(vArquivo.Strings[i]), 1, 24) = '<ans:codigoProcedimento>') then
+      begin
+        vProced := ExtrairNumeros(vArquivo.Strings[i]);
+      end;
+
+      //valor informado do procedimento
+      if (Copy(Trim(vArquivo.Strings[i]), 1, 20) = '<ans:valorInformado>') then
+      begin
+        vValorProcedApres := StrToInt(ExtrairNumeros(vArquivo.Strings[i])) / 100;
+
+        qryBusca.Close;
+        qryBusca.ParamByName('GUIA_COD').AsInteger := StrToInt(vGuia);
+        qryBusca.ParamByName('ITEM_COD').AsString  := Copy(vProced, 1, 7);
+        qryBusca.Open();
+
+        if not qryBusca.IsEmpty then
+        begin
+          vLinha := '                <ans:valorInformado>' + FormatFloat('0.00', qryBuscavalor_apres.AsFloat, FormatSettings) + '</ans:valorInformado>';
+          vValorGuiaApres := vValorGuiaApres +
+                             qryBuscavalor_apres.AsFloat;
+        end
+        else
+        begin
+          vValorGuiaApres := vValorGuiaApres +
+                             vValorProcedApres;
+        end;
+
+        vValorProcedApres := 0;
+      end;
+
+      //valor informado da guia
+      if (Copy(Trim(vArquivo.Strings[i]), 1, 24) = '<ans:valorInformadoGuia>') then
+      begin
+        vLinha          := '              <ans:valorInformadoGuia>' + FormatFloat('0.00', vValorGuiaApres, FormatSettings) + '</ans:valorInformadoGuia>';
+        vValorLoteApres := vValorLoteApres + vValorGuiaApres;
+        vValorGuiaApres := 0;
+      end;
+
+      //valor informado do protocolo
+      if (Copy(Trim(vArquivo.Strings[i]), 1, 29) = '<ans:valorInformadoProtocolo>') then
+      begin
+        vLinha             := '            <ans:valorInformadoProtocolo>' + FormatFloat('0.00', vValorLoteApres, FormatSettings) + '</ans:valorInformadoProtocolo>';
+        vValorArquivoApres := vValorArquivoApres + vValorLoteApres;
+        vValorLoteApres    := 0;
+      end;
+
+      //valor informado do arquivo
+      if (Copy(Trim(vArquivo.Strings[i]), 1, 25) = '<ans:valorInformadoGeral>') then
+      begin
+        vLinha        := '        <ans:valorInformadoGeral>' + FormatFloat('0.00', vValorArquivo, FormatSettings) + '</ans:valorInformadoGeral>';
+      end;
+      Memo1.Lines.Add(vLinha);
+    end;
+
+  finally
+    FreeAndNil(vArquivo);
+  end;
+end;
+
+function TForm1.ExtrairNumeros(const Texto: string): string;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 1 to Length(Texto) do
+    if Texto[i] in ['0'..'9'] then
+      Result := Result + Texto[i];
+end;
+
+
+end.
