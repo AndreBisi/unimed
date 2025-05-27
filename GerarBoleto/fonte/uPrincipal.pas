@@ -14,7 +14,7 @@ uses
   FireDAC.Phys.PG, FireDAC.Phys.PGDef, FireDAC.Phys.ODBCBase,
   FireDAC.Comp.UI, ppBands, ppStrtch, ppMemo, ppClass, ppDB, ppDBPipe,
   ppDBBDE, ppParameter, ppDesignLayer, ppCtrls, ppBarCod, ppPrnabl,
-  ppCache, ppComm, ppRelatv, ppProd, ppReport, JvSpin;
+  ppCache, ppComm, ppRelatv, ppProd, ppReport, JvSpin, System.IOUtils;
 
 type
   TForm1 = class(TForm)
@@ -319,11 +319,7 @@ type
     Panel3: TPanel;
     Panel4: TPanel;
     Label5: TLabel;
-    edtFator: TJvFilenameEdit;
     BitBtn5: TBitBtn;
-    Label6: TLabel;
-    edCoparticip: TJvFilenameEdit;
-    RadioGroup1: TRadioGroup;
     memoEnvio: TMemo;
     BitBtn6: TBitBtn;
     qryEmail: TFDQuery;
@@ -385,7 +381,6 @@ type
     qryTitulo2idtitulo: TIntegerField;
     qryTitulo2numtit: TIntegerField;
     qryEmailcodpessoa: TIntegerField;
-    qryEmailemail: TStringField;
     qryContratocodadmin: TIntegerField;
     qryContratonumcontr: TIntegerField;
     qryContratocodusuario: TIntegerField;
@@ -404,13 +399,9 @@ type
     Label16: TLabel;
     ckSenhaTodosBoleto: TCheckBox;
     ckSenhaTodosMensalidade: TCheckBox;
-    ckSenhaTodosFM: TCheckBox;
     ckSenhaTodosFatura: TCheckBox;
     Label17: TLabel;
     edtMaximo: TJvCalcEdit;
-    Label18: TLabel;
-    edtHoraAgenda: TJvTimeEdit;
-    chkEnvioAgenda: TCheckBox;
     Timer1: TTimer;
     ckSequencial: TCheckBox;
     BitBtn9: TBitBtn;
@@ -425,6 +416,19 @@ type
     conexaoQuitacao: TFDConnection;
     qryEmailQuitacaocodpessoa: TIntegerField;
     qryEmailQuitacaoemail: TStringField;
+    edtFator: TJvDirectoryEdit;
+    qryArquivoSGU: TFDQuery;
+    FDPhysPgDriverLink1: TFDPhysPgDriverLink;
+    FDGUIxWaitCursor1: TFDGUIxWaitCursor;
+    qryArquivoSGUnumtit: TIntegerField;
+    qryArquivoSGUcodpessoa: TIntegerField;
+    qryArquivoSGUidtitulo: TIntegerField;
+    qryArquivoSGUdatavencimento: TDateField;
+    qryArquivoSGUdataemissao: TDateField;
+    qryArquivoSGUnrdocbco: TStringField;
+    qryArquivoSGUvalsaldo: TBCDField;
+    qryArquivoSGUprocessosgu: TIntegerField;
+    qryEmailemail: TMemoField;
     procedure BitBtn1Click(Sender: TObject);
     procedure geraBoleto;
     function calculaDigito( pTexto : string ) : string;
@@ -462,14 +466,13 @@ type
     function contaCaracter( ptexto : string ) : integer;
     procedure tabelaCOVID;
     function documentoSenha( pCodPessoa : integer; pForcaTodos : boolean ) : string;
-    procedure Timer1Timer(Sender: TObject);
-    procedure chkEnvioAgendaClick(Sender: TObject);
 
     procedure enviarEmails(pForma : string);
     procedure BitBtn9Click(Sender: TObject);
     procedure BitBtn10Click(Sender: TObject);
 
     function alteraTagMenssagem( pTexto : string ) : String;
+    function ExisteArquivoSequencial(FileNameBase: string; Directory: string = 'C:\envioBoleto\Enviar\'): Boolean;
 
   private
     { Private declarations }
@@ -492,9 +495,15 @@ implementation
 uses libXE, ShellApi;
 
 procedure TForm1.anexaBoleto( pCodPessoa : integer );
+var
+  i : Integer;
+
 begin
-  if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Boleto.PDF' ) ) then
-  arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Boleto.PDF' ) );
+  for I := 1 to 9999 do
+  begin
+    if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Boleto' + formatFloat('0000', i) + '.PDF' ) ) then
+    arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Boleto' + formatFloat('0000', i) + '.PDF' ) );
+  end;
 end;
 
 procedure TForm1.anexaComunicado;
@@ -504,39 +513,63 @@ begin
 end;
 
 procedure TForm1.anexaCoparticip( pCodPessoa : integer );
-begin
-  if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Coparticipacao.PDF' ) ) then
-  arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Coparticipacao.PDF' ) );
+var
+  i : Integer;
 
-  if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Coparticipacao.TXT' ) ) then
-  arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Coparticipacao.TXT' ) );
+begin
+  for I := 1 to 9999 do
+  begin
+    if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'COPARTICIP' + formatFloat('0000', i) + '.PDF' ) ) then
+    arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'COPARTICIP' + formatFloat('0000', i) + '.PDF' ) );
+
+    if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'COPARTICIP' + formatFloat('0000', i) + '.TXT' ) ) then
+    arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'COPARTICIP' + formatFloat('0000', i) + '.TXT' ) );
+  end;
 end;
 
 procedure TForm1.anexaFator( pCodPessoa : integer );
+var
+  i : Integer;
+
 begin
-  if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'FatorModerador.PDF' ) ) then
-  arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'FatorModerador.PDF' ) );
+  for I := 1 to 9999 do
+  begin
+    if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'FatorModerador' + formatFloat('0000', i) + '.PDF' ) ) then
+    arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'FatorModerador' + formatFloat('0000', i) + '.PDF' ) );
+  end;
 end;
 
 procedure TForm1.anexaFatura( pCodPessoa : integer );
+var
+  i : Integer;
+
 begin
-  if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Fatura.PDF' ) ) then
-  arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Fatura.PDF' ) );
+  for I := 1 to 9999 do
+  begin
+    if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Fatura' + formatFloat('0000', i) + '.PDF' ) ) then
+    arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Fatura' + formatFloat('0000', i) + '.PDF' ) );
+  end;
 end;
 
 procedure TForm1.anexaMensalidade( pCodPessoa : integer );
-begin
-  if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade.PDF' ) ) then
-  arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade.PDF' ) );
+var
+  i : Integer;
 
-  if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade.TXT' ) ) then
-  arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade.TXT' ) );
+begin
+  for I := 1 to 9999 do
+  begin
+    if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade' + formatFloat('0000', i) + '.PDF' ) ) then
+    arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade' + formatFloat('0000', i) + '.PDF' ) );
+
+    if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade' + formatFloat('0000', i) + '.TXT' ) ) then
+    arqAnexos.Add( ( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', pCodPessoa ) + 'Mensalidade' + formatFloat('0000', i) + '.TXT' ) );
+  end;
 end;
 
 procedure TForm1.anexaQuitacao(pCodPessoa: integer);
 begin
-  if ( FileExists( 'C:\AGBSoft\QuitacaoDeDebitos\2023\separados\' + FormatFloat( '00000000', pCodPessoa ) + 'QuitacaoDebitos_2023.PDF' ) ) then
-  arqAnexos.Add( ( 'C:\AGBSoft\QuitacaoDeDebitos\2023\separados\' + FormatFloat( '00000000', pCodPessoa ) + 'QuitacaoDebitos_2023.PDF' ) );
+  if ( FileExists( 'C:\AGBSoft\QuitacaoDeDebitos\2024\separados\' + FormatFloat( '00000000', pCodPessoa ) + 'QuitacaoDebitos_2024.PDF' ) ) then
+  arqAnexos.Add( ( 'C:\AGBSoft\QuitacaoDeDebitos\2024\separados\' + FormatFloat( '00000000', pCodPessoa ) + 'QuitacaoDebitos_2024.PDF' ) );
 end;
 
 procedure TForm1.BitBtn10Click(Sender: TObject);
@@ -755,8 +788,32 @@ begin
 end;
 
 procedure TForm1.BitBtn5Click(Sender: TObject);
+var
+  ArquivoOrigem: string;
+  ArquivoDestino: string;
+
 begin
-  if RadioGroup1.ItemIndex = 1 then
+   qryArquivoSGU.Close;
+   qryArquivoSGU.Open();
+
+   while not qryArquivoSGU.Eof do
+   begin
+     ArquivoOrigem  := edtFator.Directory +
+                       '\ANALITICO_SERVICO_EMPRESARIAL_' +
+                       FormatFloat('0000000000', qryArquivoSGUprocessosgu.AsInteger) +
+                       '-1.PDF';
+     ArquivoDestino := 'C:\envioBoleto\enviar\' +
+                       FormatFloat('00000000', qryArquivoSGUcodpessoa.AsInteger) +
+                       'COPARTICIP' +
+                       FormatFloat('0000', qryArquivoSGU.RecNo) +
+                       '.PDF';
+
+     TFile.Copy(ArquivoOrigem, ArquivoDestino, True); // True sobrescreve se já existir
+
+     qryArquivoSGU.Next;
+   end;
+   qryArquivoSGU.Close;
+{  if RadioGroup1.ItemIndex = 1 then
   begin
     if Copy( edtFator.Text, 1, 1 ) = '"' then
     edtFator.Text := Copy( edtFator.Text, 2, length( edtFator.Text ) - 1 );
@@ -795,7 +852,7 @@ begin
     end
     else
     MessageBox(Application.Handle, PChar( 'Escolha o arquivo' ), 'Erro', 16 );
-  end;
+  end;}
 end;
 
 procedure TForm1.BitBtn6Click(Sender: TObject);
@@ -983,11 +1040,6 @@ begin
   result := IntToStr( vDig );
 end;
 
-procedure TForm1.chkEnvioAgendaClick(Sender: TObject);
-begin
-  Timer1.Enabled := chkEnvioAgenda.Checked;
-end;
-
 function TForm1.contaCaracter(ptexto: string): integer;
 var
   i : integer;
@@ -1067,7 +1119,8 @@ begin
     while ( not qryEmail.Eof ) and ( contador <= edtMaximo.Value ) do
     begin
       arqAnexos.Clear;
-      if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', qryEmailcodpessoa.AsInteger ) + 'Boleto.PDF' ) ) then
+      //if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', qryEmailcodpessoa.AsInteger ) + 'Boleto*.PDF' ) ) then
+      if (ExisteArquivoSequencial(FormatFloat( '00000000', qryEmailcodpessoa.AsInteger ) + 'Boleto')) then
       begin
         try
           anexaMensalidade( qryEmailcodpessoa.AsInteger );
@@ -1077,7 +1130,7 @@ begin
           anexaCoparticip( qryEmailcodpessoa.AsInteger );
           anexaComunicado;
 
-          if ( arqAnexos.Count > 0 ) and ( OnlyChar( qryEmailemail.AsString ) <> '' ) then
+          if ( arqAnexos.Count > 0 ) and ( qryEmailemail.AsString <> '' ) then
           begin
             // instanciação dos objetos
             IdSSLIOHandlerSocket2 := TIdSSLIOHandlerSocketOpenSSL.Create(Self);
@@ -1204,7 +1257,8 @@ begin
     while ( not qryEmail.Eof ) do
     begin
       arqAnexos.Clear;
-      if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', qryEmailcodpessoa.AsInteger ) + 'Boleto.PDF' ) ) then
+      //if ( FileExists( 'C:\envioBoleto\Enviar\' + FormatFloat( '00000000', qryEmailcodpessoa.AsInteger ) + 'Boleto.PDF' ) ) then
+      if (ExisteArquivoSequencial(FormatFloat( '00000000', qryEmailcodpessoa.AsInteger ) + 'Boleto')) then
       begin
         Sleep( 5000 );
         try
@@ -1361,7 +1415,7 @@ begin
     while ( not qryEmailQuitacao.Eof ) do
     begin
       arqAnexos.Clear;
-      if ( FileExists( 'C:\AGBSoft\QuitacaoDeDebitos\2023\separados\' + FormatFloat( '00000000', qryEmailQuitacaocodpessoa.AsInteger ) + 'QuitacaoDebitos_2023.PDF' ) ) then
+      if ( FileExists( 'C:\AGBSoft\QuitacaoDeDebitos\2024\separados\' + FormatFloat( '00000000', qryEmailQuitacaocodpessoa.AsInteger ) + 'QuitacaoDebitos_2024.PDF' ) ) then
       begin
         Sleep( 10000 );
         try
@@ -1448,18 +1502,18 @@ begin
 
                 for x := 0 to arqAnexos.Count-1 do
                 begin
-                  if NomeArquivo( arqAnexos.Strings[x] ) <> 'QuitacaoDebitos_2023.PDF' then
-                  CopyFile( Pchar( arqAnexos.Strings[x] ), Pchar( 'C:\AGBSoft\QuitacaoDeDebitos\2023\enviados\' + NomeArquivo( arqAnexos.Strings[x] ) ), FALSE );
+                  if NomeArquivo( arqAnexos.Strings[x] ) <> 'QuitacaoDebitos_2024.PDF' then
+                  CopyFile( Pchar( arqAnexos.Strings[x] ), Pchar( 'C:\AGBSoft\QuitacaoDeDebitos\2024\enviados\' + NomeArquivo( arqAnexos.Strings[x] ) ), FALSE );
                 end;
 
                 for x := 0 to arqAnexos.Count-1 do
                 begin
-                  if NomeArquivo( arqAnexos.Strings[x] ) <> 'QuitacaoDebitos_2023.PDF' then
+                  if NomeArquivo( arqAnexos.Strings[x] ) <> 'QuitacaoDebitos_2024.PDF' then
                   DeleteFile( arqAnexos.Strings[x] );
                 end;
                 //ArqEnv.Add( ArqAnexo );
 
-                Memo1.Lines.SaveToFile('C:\AGBSoft\QuitacaoDeDebitos\2023\enviados\' + FormatFloat( '000000', qryEmailQuitacaocodpessoa.AsInteger ) + '_' + formatdateTime( 'dd_mm_yyyy', now ) + '__' + FormatDateTime( 'hh_mm_ss', now ) + '.Txt');
+                Memo1.Lines.SaveToFile('C:\AGBSoft\QuitacaoDeDebitos\2024\enviados\' + FormatFloat( '000000', qryEmailQuitacaocodpessoa.AsInteger ) + '_' + formatdateTime( 'dd_mm_yyyy', now ) + '__' + FormatDateTime( 'hh_mm_ss', now ) + '.Txt');
               except
                 On E:Exception do
                 begin
@@ -1483,7 +1537,7 @@ begin
           contador := contador + 1;
           label15.refresh;
         except
-          Memo1.Lines.SaveToFile('C:\AGBSoft\QuitacaoDeDebitos\2023\enviados\' + formatdateTime( 'dd_mm_yyyy', now ) + '__' + FormatDateTime( 'hh_mm_ss', now ) + '.Txt');
+          Memo1.Lines.SaveToFile('C:\AGBSoft\QuitacaoDeDebitos\2024\enviados\' + formatdateTime( 'dd_mm_yyyy', now ) + '__' + FormatDateTime( 'hh_mm_ss', now ) + '.Txt');
           qryEmailQuitacao.Close;
         end;
       end;
@@ -1837,7 +1891,7 @@ var
   vNumLinha : Integer;
 
 begin
-  qryCriaTemp.ExecSQL;
+  {qryCriaTemp.ExecSQL;
   qryApagaDados.ExecSQL;
   i       := 0;
   vMaior  := False;
@@ -1996,7 +2050,7 @@ begin
 
   CloseFile( vArquivo );
   qryRelMensalidade.Close;
-  qryApagaTemp.ExecSQL;
+  qryApagaTemp.ExecSQL;}
 end;
 
 procedure TForm1.imporTFDadosFator;
@@ -2017,7 +2071,7 @@ var
   vNumLinha: Integer;
 
 begin
-  qryCriaTemp.ExecSQL;
+{  qryCriaTemp.ExecSQL;
   qryApagaDados.ExecSQL;
   i       := 0;
   vMaior  := False;
@@ -2160,7 +2214,7 @@ begin
 
   CloseFile( vArquivo );
   qryRelMensalidade.Close;
-  qryApagaTemp.ExecSQL;
+  qryApagaTemp.ExecSQL; }
 end;
 
 procedure TForm1.imporTFDadosFatura;
@@ -2520,18 +2574,6 @@ begin
   Closefile( Arquivo );
 end;
 
-procedure TForm1.Timer1Timer(Sender: TObject);
-begin
-  if edtHoraAgenda.Text = FormatDateTime( 'hh:mm', now ) then
-  begin
-    if chkEnvioAgenda.Checked then
-    begin
-      chkEnvioAgenda.Checked := False;
-      BitBtn6.Click;
-    end;
-  end;
-end;
-
 Function TForm1.AllTrim( Texto : String ) : String;
 var
   I  : Integer;
@@ -2592,6 +2634,22 @@ begin
   vRetorno := pTexto.Replace( '<<saudacao>>', 'Boa noite' );
 
   Result := vRetorno;
+end;
+
+function TForm1.ExisteArquivoSequencial(FileNameBase: string; Directory: string = 'C:\envioBoleto\Enviar\'): Boolean;
+var
+  SearchPattern: string;
+  SearchRec: TSearchRec;
+begin
+  Result := False;
+  SearchPattern := FileNameBase + '*.PDF';
+
+  try
+    if FindFirst(TPath.Combine(Directory, SearchPattern), faAnyFile, SearchRec) = 0 then
+      Result := True;
+  finally
+    FindClose(SearchRec);
+  end;
 end;
 
 end.

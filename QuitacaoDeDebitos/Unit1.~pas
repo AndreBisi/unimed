@@ -1,0 +1,90 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ZConnection, DB, ZAbstractRODataset, ZAbstractDataset, ZDataset,
+  StdCtrls, ppStrtch, ppMemo, ppCtrls, ppPrnabl, ppClass, ppBands, ppCache,
+  ppDB, ppProd, ppReport, ppComm, ppRelatv, ppDBPipe, ppDBBDE, ppParameter,
+  ppRichTx, jpeg;
+
+type
+  TForm1 = class(TForm)
+    Conexao: TZConnection;
+    ZQuery1: TZQuery;
+    Button1: TButton;
+    ppReport1: TppReport;
+    DataSource1: TDataSource;
+    ppHeaderBand1: TppHeaderBand;
+    ppDetailBand1: TppDetailBand;
+    ppFooterBand1: TppFooterBand;
+    ppLabel1: TppLabel;
+    ppDBText1: TppDBText;
+    ppMemo1: TppMemo;
+    ppMemo3: TppMemo;
+    ppLabel2: TppLabel;
+    ppParameterList1: TppParameterList;
+    Label1: TLabel;
+    ZQuery1pessoacod: TIntegerField;
+    ZQuery1pessoanom: TStringField;
+    ZQuery1dtvencimento: TDateField;
+    ZQuery1dtpagamento: TDateField;
+    ZQuery1valorpago: TFloatField;
+    ppBDEPipeline1: TppBDEPipeline;
+    ppGroup1: TppGroup;
+    ppGroupHeaderBand1: TppGroupHeaderBand;
+    ppGroupFooterBand1: TppGroupFooterBand;
+    ppDBText2: TppDBText;
+    ppDBText3: TppDBText;
+    ppDBText4: TppDBText;
+    ppLabel3: TppLabel;
+    ppLabel4: TppLabel;
+    ppLabel5: TppLabel;
+    ppDBText5: TppDBText;
+    ppLabel6: TppLabel;
+    ppImage1: TppImage;
+    ppLine1: TppLine;
+    ppImage2: TppImage;
+    ppRichText1: TppRichText;
+    procedure Button1Click(Sender: TObject);
+    function CompletaEspacoEsquerda( Texto: String; Qtd: Integer ) : String;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  Conexao.Connect;
+  ZQuery1.Open;
+
+  Label1.Caption := IntToStr( ZQuery1.RecordCount );
+
+  ppReport1.Print;
+
+end;
+
+Function TForm1.CompletaEspacoEsquerda(texto : string; qtd : integer) : string;
+var
+  Tamanho,I : integer;
+  TextoRet  : String;
+
+begin
+  Tamanho := Length(Texto);
+  for I := 1 to (Qtd - Tamanho) do
+  begin
+    TextoRet := ' ' + TextoRet;
+  end;
+  Result := TextoRet + Texto;
+end;
+
+end.

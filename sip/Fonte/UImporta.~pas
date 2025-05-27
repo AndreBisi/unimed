@@ -1,0 +1,123 @@
+unit UImporta;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Mask, ToolEdit, JvExMask, JvToolEdit;
+
+type
+  TFImporta = class(TForm)
+    Label1: TLabel;
+    Button1: TButton;
+    CheckBox1: TCheckBox;
+    FilenameEdit1: TJvFilenameEdit;
+    procedure ExtraiDadosArquivo;
+    procedure Button1Click(Sender: TObject);
+    function  TiraAcentos(Texto: string): String;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FImporta: TFImporta;
+
+implementation
+
+uses Unit1;
+
+{$R *.dfm}
+
+procedure TFImporta.ExtraiDadosArquivo;
+var
+  DataFile : TextFile;
+  lineFile : String;
+  fileStrings : TStringList;
+
+begin
+   AssignFile(DataFile, FilenameEdit1.Text);
+   Reset(DataFile);
+   try
+     fileStrings := TStringList.Create;
+     try
+       while not Eof( DataFile ) do
+         begin
+           Readln( DataFile, lineFile );
+           ExtractStrings([';'],[' '],PChar(LineFile),fileStrings);
+
+           Form1.QrySip.Insert;
+           Form1.QrySipcodadm.Value         := StrToInt( fileStrings[0] );
+           Form1.QrySipnumcontr.Value       := StrToInt( fileStrings[1] );
+           Form1.QrySipcodusuario.Value     := StrToInt( fileStrings[2] );
+           Form1.QrySipparentesco.Value     := StrToInt( fileStrings[3] );
+           Form1.QrySipnumguia.Value        := StrToInt( fileStrings[4] );
+           Form1.QrySipguia.Value           := TiraAcentos( fileStrings[5] );
+           Form1.QrySiptipoguia.Value       := StrToInt( fileStrings[6] );
+           Form1.QrySipcontr.Value          := TiraAcentos( fileStrings[7] );
+           Form1.QrySipgruproced.Value      := StrToInt( fileStrings[8] );
+           Form1.QrySipsubproced.Value      := StrToInt( fileStrings[9] );
+           Form1.QrySipcodproced.Value      := StrToInt( fileStrings[10] );
+           Form1.QrySipvalorguia.Value      := StrToFloat( fileStrings[11] ) / 100;
+           Form1.QrySipvalorfilme.Value     := StrToFloat( fileStrings[12] ) / 100;
+           Form1.QrySipvalortaxa.Value      := StrToFloat( fileStrings[13] ) / 100;
+           Form1.QrySipcodesp.Value         := StrToInt( fileStrings[14] );
+           Form1.QrySipdatservico.Value     := StrToDate( fileStrings[15] );
+           Form1.QrySipqtdeproc.Value       := StrToFloat( fileStrings[16] ) / 100;
+
+           if StrToDate( fileStrings[17] ) > now then
+           Form1.QrySipdatnasc.Value        := StrToDate( Copy( fileStrings[17], 1, 6 ) + '19' + Copy( fileStrings[17], 7, 2 ) )
+           else
+           Form1.QrySipdatnasc.Value        := StrToDate( fileStrings[17] );
+
+           Form1.QrySipdatbaixa.Value       := StrToDate( fileStrings[18] );
+           Form1.QrySipcid.Value            := TiraAcentos( fileStrings[19] );
+
+           if UpperCase( fileStrings[20] ) = 'NO' then
+           Form1.QrySipsexo.Value           := 'F'
+           else
+           Form1.QrySipsexo.Value           := 'M';
+
+           Form1.QrySiptipoint.Value        := fileStrings[21];
+           Form1.QrySipcodpessoapgto.Value  := StrToInt( fileStrings[22] );
+           form1.QrySipnomepessoapgto.Value := TiraAcentos( fileStrings[23] );
+           Form1.QrySipdatapgto.Value       := StrToDate( fileStrings[24] );
+           Form1.QrySiptipoproced.Value     := TiraAcentos( fileStrings[25] );
+           Form1.QrySip.Post;
+
+           fileStrings.Clear;
+         end;
+     finally
+       fileStrings.Free;
+     end;
+   finally
+     CloseFile(DataFile);
+   end;
+end;
+
+procedure TFImporta.Button1Click(Sender: TObject);
+begin
+  if CheckBox1.Checked then
+  Form1.QryDelSip.ExecSQL;
+
+  Form1.QrySip.Open;
+  ExtraiDadosArquivo;
+  Form1.QrySip.Close;
+end;
+
+function TFImporta.TiraAcentos(Texto: string): String;
+const
+  sLetraA = '"''';
+  sLetraB = '  ';
+var
+  i: Integer;
+begin
+  for i := 1 to Length(sLetraA)  do
+    Texto := StringReplace(Texto, sLetraA[i], sLetraB[i], [rfReplaceAll]);
+
+  Result := TrimRight( TrimLeft( Texto ) );
+end;
+
+
+end.

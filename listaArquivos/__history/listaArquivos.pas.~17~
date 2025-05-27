@@ -1,0 +1,130 @@
+unit listaArquivos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Mask, JvExMask, JvToolEdit, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.Oracle,
+  FireDAC.Phys.OracleDef, FireDAC.VCLUI.Wait, FireDAC.Stan.Param,
+  FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, Data.DB,
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, FireDAC.Phys.PG,
+  FireDAC.Phys.PGDef, FireDAC.Comp.UI;
+
+type
+  TForm1 = class(TForm)
+    edtDiretorio1: TJvDirectoryEdit;
+    Label1: TLabel;
+    Panel1: TPanel;
+    lbArquivo: TListBox;
+    Memo1: TMemo;
+    Button1: TButton;
+    Button2: TButton;
+    conexaoSGU: TFDConnection;
+    FDPhysOracleDriverLink1: TFDPhysOracleDriverLink;
+    qryProcesso: TFDQuery;
+    qryProcessoCOD_PESSOA: TBCDField;
+    qryProcessoDOCUMENTO: TStringField;
+    conexao: TFDConnection;
+    qryDelEmail: TFDQuery;
+    FDPhysPgDriverLink1: TFDPhysPgDriverLink;
+    FDGUIxWaitCursor1: TFDGUIxWaitCursor;
+    qryInsertEmail: TFDQuery;
+    qryProcessoEMAIL: TStringField;
+    qryDelPessoa: TFDQuery;
+    qryInsertPessoa: TFDQuery;
+    qryPessoa: TFDQuery;
+    procedure Button1Click(Sender: TObject);
+    function GetFileList( const Path: string): TStringList;
+    procedure Button2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  lbArquivo.Items := GetFileList( edtDiretorio1.Directory + '\*.PDF' );
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+  i: integer;
+  codProcesso : string;
+
+begin
+  Memo1.Lines.Clear;
+  qryDelEmail.ExecSQL;
+  qryDelPessoa.ExecSQL;
+
+  for I := 0 to lbArquivo.Items.Count -1 do
+  begin
+    //0004159137-1.pdf
+    codProcesso := Copy(lbArquivo.Items[ i ], 1, 10);
+
+    qryProcesso.Close;
+    qryProcesso.ParamByName('COD_PROCESSO').AsInteger := StrToInt(codProcesso);
+    qryProcesso.Open();
+
+    Memo1.Lines.Add(lbArquivo.Items[ i] + ';' +
+                    qryProcessoDOCUMENTO.AsString);
+
+    while not qryProcesso.Eof do
+    begin
+      qryPessoa.Close;
+      qryPessoa.ParamByName('codPessoa').AsInteger := qryProcessoCOD_PESSOA.AsInteger;
+      qryPessoa.Open();
+
+      if qryPessoa.IsEmpty then
+      begin
+        qryInsertPessoa.ParamByName('codpessoa').AsInteger := qryProcessoCOD_PESSOA.AsInteger;
+        qryInsertPessoa.ParamByName('nome').AsString       := 'Pessoa ' + qryProcessoCOD_PESSOA.AsString;
+        qryInsertPessoa.ParamByName('documento').AsString  := qryProcessoDOCUMENTO.AsString;
+        qryInsertPessoa.ExecSQL;
+      end;
+
+      if qryProcessoEMAIL.AsString <> '' then
+      begin
+        qryInsertEmail.ParamByName('codpessoa').AsInteger := qryProcessoCOD_PESSOA.AsInteger;
+        qryInsertEmail.ParamByName('email').AsString      := qryProcessoEMAIL.AsString;
+        qryInsertEmail.ExecSQL;
+      end;
+
+      RenameFile(edtDiretorio1.Text + '\' + lbArquivo.Items[ i ],
+                 edtDiretorio1.Text + '\' + FormatFloat('00000000' , qryProcessoCOD_PESSOA.AsInteger ) + 'MENSALIDADE' + formatfloat('0000', i)));
+      qryProcesso.Next;
+    end;
+  end;
+end;
+
+function TForm1.GetFileList(const Path: string): TStringList;
+var
+  I: Integer;
+  SearchRec: TSearchRec;
+
+begin
+  Result := TStringList.Create;
+  try
+    I := FindFirst(Path, 0, SearchRec);
+    while I = 0 do
+    begin
+      Result.Add(SearchRec.Name);
+      I := FindNext(SearchRec);
+    end;
+    except
+      Result.Free;
+    raise;
+  end;
+end;
+
+end.

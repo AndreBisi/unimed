@@ -1,0 +1,827 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, XPMan, StdCtrls, DB, ZAbstractRODataset, ZAbstractDataset,
+  ZDataset, ZConnection, Mask, StrUtils, Math  ;
+
+type
+  TForm1 = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    XPManifest1: TXPManifest;
+    ZConnection1: TZConnection;
+    QrySip: TZQuery;
+    QrySipcodadm: TIntegerField;
+    QrySipnumcontr: TIntegerField;
+    QrySipcodusuario: TIntegerField;
+    QrySipparentesco: TIntegerField;
+    QrySipnumguia: TIntegerField;
+    QrySipguia: TStringField;
+    QrySiptipoguia: TIntegerField;
+    QrySipcontr: TStringField;
+    QrySipgruproced: TIntegerField;
+    QrySipsubproced: TIntegerField;
+    QrySipcodproced: TIntegerField;
+    QrySipvalorguia: TFloatField;
+    QrySipvalorfilme: TFloatField;
+    QrySipvalortaxa: TFloatField;
+    QrySipcodesp: TIntegerField;
+    QrySipdatservico: TDateField;
+    QrySipqtdeproc: TFloatField;
+    QrySipdatnasc: TDateField;
+    QrySipdatbaixa: TDateField;
+    QrySipcid: TStringField;
+    QrySipsexo: TStringField;
+    QrySiptipoint: TStringField;
+    QrySipsipok: TBooleanField;
+    QrySipsipclas: TStringField;
+    QrySipsipclas2: TStringField;
+    QryDelSip: TZQuery;
+    IntegerField1: TIntegerField;
+    IntegerField2: TIntegerField;
+    IntegerField3: TIntegerField;
+    IntegerField4: TIntegerField;
+    IntegerField5: TIntegerField;
+    StringField1: TStringField;
+    IntegerField6: TIntegerField;
+    StringField2: TStringField;
+    IntegerField7: TIntegerField;
+    IntegerField8: TIntegerField;
+    IntegerField9: TIntegerField;
+    FloatField1: TFloatField;
+    FloatField2: TFloatField;
+    FloatField3: TFloatField;
+    IntegerField10: TIntegerField;
+    DateField1: TDateField;
+    FloatField4: TFloatField;
+    DateField2: TDateField;
+    DateField3: TDateField;
+    StringField3: TStringField;
+    StringField4: TStringField;
+    StringField5: TStringField;
+    BooleanField1: TBooleanField;
+    StringField6: TStringField;
+    StringField7: TStringField;
+    QryConsultas: TZQuery;
+    Button3: TButton;
+    QryData: TZQuery;
+    QryDatadatservico: TDateField;
+    QrySipcodpessoapgto: TIntegerField;
+    QrySipnomepessoapgto: TStringField;
+    QrySipdatapgto: TDateField;
+    QryConsultasPS: TZQuery;
+    QrySiptipoproced: TStringField;
+    QryItensB: TZQuery;
+    QryItensC1: TZQuery;
+    QryItensC2: TZQuery;
+    QryItensC3: TZQuery;
+    QryItensC4: TZQuery;
+    QryItensD1: TZQuery;
+    QryConfere: TZQuery;
+    QryConferecount: TLargeintField;
+    QryItensE2: TZQuery;
+    QryItensE3: TZQuery;
+    QryItensE4_5: TZQuery;
+    QryItensF: TZQuery;
+    QryAjustes: TZQuery;
+    Button4: TButton;
+    SaveDialog1: TSaveDialog;
+    QryExpA: TZQuery;
+    QryExpAcontr: TStringField;
+    QryExpAvalor: TFloatField;
+    QryExpAqtd: TFloatField;
+    QryExpAsipclas: TStringField;
+    QryExpAtrimestre: TMemoField;
+    QryExpAtrimestreocorrencia: TMemoField;
+    QryExpA2: TZQuery;
+    QryExpA2contr: TStringField;
+    QryExpA2valor: TFloatField;
+    QryExpA2qtd: TFloatField;
+    QryExpA2trimestre: TMemoField;
+    QryExpA2trimestreocorrencia: TMemoField;
+    QryExpA2sipclas: TStringField;
+    QryExpB: TZQuery;
+    QryExpBcontr: TStringField;
+    QryExpBvalor: TFloatField;
+    QryExpBqtd: TFloatField;
+    QryExpBsipclas: TStringField;
+    QryExpBtrimestre: TMemoField;
+    QryExpBtrimestreocorrencia: TMemoField;
+    QryExpB2: TZQuery;
+    QryExpB2contr: TStringField;
+    QryExpB2valor: TFloatField;
+    QryExpB2qtd: TFloatField;
+    QryExpB2sipclas: TStringField;
+    QryExpB2trimestre: TMemoField;
+    QryExpB2trimestreocorrencia: TMemoField;
+    QryExpC: TZQuery;
+    QryExpC2: TZQuery;
+    QryExpCcontr: TStringField;
+    QryExpCvalor: TFloatField;
+    QryExpCqtd: TFloatField;
+    QryExpCsipclas: TStringField;
+    QryExpCtrimestre: TMemoField;
+    QryExpCtrimestreocorrencia: TMemoField;
+    QryExpC2contr: TStringField;
+    QryExpC2valor: TFloatField;
+    QryExpC2qtd: TFloatField;
+    QryExpC2sipclas: TStringField;
+    QryExpC2trimestre: TMemoField;
+    QryExpC2trimestreocorrencia: TMemoField;
+    QryDatadatbaixa: TDateField;
+    QryExpD: TZQuery;
+    QryExpD2: TZQuery;
+    QryExpDcontr: TStringField;
+    QryExpDvalor: TFloatField;
+    QryExpDqtd: TFloatField;
+    QryExpDsipclas: TStringField;
+    QryExpDtrimestre: TMemoField;
+    QryExpDtrimestreocorrencia: TMemoField;
+    QryExpD2contr: TStringField;
+    QryExpD2valor: TFloatField;
+    QryExpD2qtd: TFloatField;
+    QryExpD2sipclas: TStringField;
+    QryExpD2trimestre: TMemoField;
+    QryExpD2trimestreocorrencia: TMemoField;
+    QryExpH: TZQuery;
+    QryExpHcontr: TStringField;
+    QryExpHvalor: TFloatField;
+    QryExpHqtd: TFloatField;
+    QryExpHsipclas: TStringField;
+    QryExpHtrimestre: TMemoField;
+    QryExpHtrimestreocorrencia: TMemoField;
+    QryExpE: TZQuery;
+    QryExpEcontr: TStringField;
+    QryExpEvalor: TFloatField;
+    QryExpEqtd: TLargeintField;
+    QryExpEsipclas: TStringField;
+    QryExpEtrimestre: TMemoField;
+    QryExpEtrimestreocorrencia: TMemoField;
+    QryExpF: TZQuery;
+    QryExpFcontr: TStringField;
+    QryExpFvalor: TIntegerField;
+    QryExpFqtd: TLargeintField;
+    QryExpFsipclas2: TStringField;
+    QryExpFtrimestre: TMemoField;
+    QryExpFtrimestreocorrencia: TMemoField;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    Function NomeItem( pCodigo : String ) : String;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+uses UImporta, UData;
+
+{$R *.dfm}
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  Application.CreateForm( tFImporta, fImporta );
+  fimporta.showmodal;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+  QryConsultas.ExecSQL;
+  QryConsultasPS.ExecSQL;
+  QryItensB.ExecSQL;
+  QryItensC1.ExecSQL;
+  QryItensC2.ExecSQL;
+  QryItensC3.ExecSQL;
+  QryItensC4.ExecSQL;
+  QryItensD1.ExecSQL;
+  QryItensE2.ExecSQL;
+  QryItensE3.ExecSQL;
+  QryItensE4_5.ExecSQL;
+  QryItensF.ExecSQL;
+  QryAjustes.ExecSQL;
+
+  QryConfere.Open;
+  if QryConferecount.Value > 0 then
+  showmessage( ' Existe(m) ' + QryConferecount.AsString + ' registro(s) sem classificação ' );
+
+  QryConfere.Close;
+
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  Application.CreateForm( tFData, fData );
+  fData.showmodal;
+end;
+
+procedure TForm1.Button4Click(Sender: TObject);
+var
+  vArquivo : TextFile;
+  vLinha   : string;
+  vContr,
+  vAux     : char;
+
+begin
+  SaveDialog1.Execute;
+
+  AssignFile( vArquivo, SaveDialog1.FileName );
+  Rewrite( vArquivo );
+
+  // Consultas A......
+
+  QryExpA.Open;
+  while not QryExpA.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpAcontr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpAsipclas.Text ) + ';NC;' +
+              Copy( QryExpAtrimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpAtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+              FloatToStr( RoundTo( QryExpAqtd.Value, 0 ) ) + ';0;0';
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpA.Next;
+  end;
+  QryExpA.Close;
+
+  QryExpA2.Open;
+  while not QryExpA2.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpA2contr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpA2sipclas.Text + '.' ) + ';NC;' +
+              Copy( QryExpA2trimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpA2trimestreocorrencia.AsString, 1, 2 ) + ';' +
+              '0;0;' + formatFloat( '###.00', QryExpA2valor.Value );
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpA2.Next;
+  end;
+  QryExpA2.Close;
+
+
+  // outros atendimentos ambulatoriais......
+
+  QryExpB.Open;
+  while not QryExpB.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpBcontr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpBsipclas.Text ) + ';NC;' +
+              Copy( QryExpBtrimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpBtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+              FloatToStr( RoundTo( QryExpBqtd.Value, 0 ) ) + ';0;0';
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpB.Next;
+  end;
+  QryExpB.Close;
+
+  QryExpB2.Open;
+  while not QryExpB2.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpB2contr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpB2sipclas.Text ) + ';NC;' +
+              Copy( QryExpB2trimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpB2trimestreocorrencia.AsString, 1, 2 ) + ';' +
+              '0;0;' + formatFloat( '###.00', QryExpB2valor.Value );
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpB2.Next;
+  end;
+  QryExpB2.Close;
+
+
+  //  exames
+
+  QryExpC.Open;
+  while not QryExpC.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpCcontr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpCsipclas.Text ) + ';NC;' +
+              Copy( QryExpCtrimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpCtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+              FloatToStr( RoundTo( QryExpCqtd.Value, 0 ) ) + ';0;0';
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpC.Next;
+  end;
+  QryExpC.Close;
+
+  QryExpC2.Open;
+  while not QryExpC2.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpC2contr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpC2sipclas.Text ) + ';NC;' +
+              Copy( QryExpC2trimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpC2trimestreocorrencia.AsString, 1, 2 ) + ';' +
+              '0;0;' + formatFloat( '###.00', QryExpC2valor.Value );
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpC2.Next;
+  end;
+  QryExpC2.Close;
+
+
+    //  terapias
+
+  QryExpD.Open;
+  while not QryExpD.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpDcontr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpDsipclas.Text ) + ';NC;' +
+              Copy( QryExpDtrimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpDtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+              FloatToStr( RoundTo( QryExpDqtd.Value, 0 ) ) + ';0;0';
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpD.Next;
+  end;
+  QryExpD.Close;
+
+  QryExpD2.Open;
+  while not QryExpD2.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpD2contr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpD2sipclas.Text ) + ';NC;' +
+              Copy( QryExpD2trimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpD2trimestreocorrencia.AsString, 1, 2 ) + ';' +
+              '0;0;' + formatFloat( '###.00', QryExpD2valor.Value );
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpD2.Next;
+  end;
+  QryExpD2.Close;
+
+  // outras despesas
+
+  QryExpH.Open;
+  while not QryExpH.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpHcontr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';1;' +
+              NomeItem( QryExpHsipclas.Text ) + ';NC;' +
+              Copy( QryExpHtrimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpHtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+              '0;0;' + formatFloat( '###.00', QryExpHvalor.Value );
+
+    Writeln( vArquivo, vLinha );
+
+    QryExpH.Next;
+  end;
+  QryExpH.Close;
+
+  // internações
+
+  QryExpE.Open;
+  while not QryExpE.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpEcontr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';3;' +
+              NomeItem( QryExpEsipclas.Text ) + ';NC;' +
+              Copy( QryExpEtrimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpEtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+              FloatToStr( RoundTo( QryExpEqtd.Value, 0 ) ) + ';' +
+              '0;' + formatFloat( '###.00', QryExpEvalor.Value );
+
+    Writeln( vArquivo, vLinha );
+
+    if NomeItem( QryExpEsipclas.Text ) = 'internacoes' then
+    begin
+      vLinha := vContr + ';3;' +
+                'hospitalar;NC;' +
+                Copy( QryExpEtrimestreocorrencia.AsString, 4, 4 ) +
+                Copy( QryExpEtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+                FloatToStr( RoundTo( QryExpEqtd.Value, 0 ) ) + ';' +
+                '0;0';
+
+      Writeln( vArquivo, vLinha );
+    end;
+
+    QryExpE.Next;
+  end;
+  QryExpE.Close;
+
+
+  // causas selecionadas de internações
+
+  QryExpF.Open;
+  while not QryExpF.Eof do
+  begin
+    case AnsiIndexStr( UpperCase(QryExpFcontr.Text), ['A', 'F', 'E']) of
+      0 : vContr := '3';
+      1 : vContr := '1';
+      2 : vContr := '2';
+    end;
+
+    vLinha := vContr + ';3;' +
+              NomeItem( QryExpFsipclas2.Text ) + ';NC;' +
+              Copy( QryExpFtrimestreocorrencia.AsString, 4, 4 ) +
+              Copy( QryExpFtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+              FloatToStr( RoundTo( QryExpFqtd.Value, 0 ) ) + ';' +
+              '0;' + formatFloat( '###.00', QryExpFvalor.Value );
+
+    Writeln( vArquivo, vLinha );
+
+    {if NomeItem( QryExpFsipclas.Text ) = 'internacoes' then
+    begin
+      vLinha := vContr + ';3;' +
+                'hospitalar;NC;' +
+                Copy( QryExpEtrimestreocorrencia.AsString, 4, 4 ) +
+                Copy( QryExpEtrimestreocorrencia.AsString, 1, 2 ) + ';' +
+                FloatToStr( RoundTo( QryExpEqtd.Value, 0 ) ) + ';' +
+                '0;0';
+
+      Writeln( vArquivo, vLinha );
+    end;}
+
+    QryExpF.Next;
+  end;
+  QryExpF.Close;
+
+  CloseFile( vArquivo );
+
+end;
+
+Function TForm1.NomeItem(pCodigo: String) : String;
+begin
+  Result := '';
+
+  if pCodigo = 'A1.' then
+  Result := 'consultasMedicasAmb'
+  else
+  if pCodigo = 'A1.1' then
+  Result := 'alergiaImunologia'
+  else
+  if pCodigo = 'A1.2' then
+  Result := 'angiologia'
+  else
+  if pCodigo = 'A1.3' then
+  Result := 'cardiologia'
+  else
+  if pCodigo = 'A1.4' then
+  Result := 'cirurgiaGeral'
+  else
+  if pCodigo = 'A1.5' then
+  Result := 'clinicaMedica'
+  else
+  if pCodigo = 'A1.6' then
+  Result := 'dermatologia'
+  else
+  if pCodigo = 'A1.7' then
+  Result := 'endocrinologia'
+  else
+  if pCodigo = 'A1.8' then
+  Result := 'gastroenterologia'
+  else
+  if pCodigo = 'A1.9' then
+  Result := 'geriatria'
+  else
+  if pCodigo = 'A1.10' then
+  Result := 'GinecologiaObstetricia'
+  else
+  if pCodigo = 'A1.11' then
+  Result := 'hematologia'
+  else
+  if pCodigo = 'A1.12' then
+  Result := 'mastologia'
+  else
+  if pCodigo = 'A1.13' then
+  Result := 'nefrologia'
+  else
+  if pCodigo = 'A1.14' then
+  Result := 'neurocirurgia'
+  else
+  if pCodigo = 'A1.15' then
+  Result := 'neurologia'
+  else
+  if pCodigo = 'A1.16' then
+  Result := 'oftalmologia'
+  else
+  if pCodigo = 'A1.17' then
+  Result := 'oncologia'
+  else
+  if pCodigo = 'A1.18' then
+  Result := 'otorrinolaringologia'
+  else
+  if pCodigo = 'A1.19' then
+  Result := 'pediatria'
+  else
+  if pCodigo = 'A1.20' then
+  Result := 'proctologia'
+  else
+  if pCodigo = 'A1.21' then
+  Result := 'psiquiatria'
+  else
+  if pCodigo = 'A1.22' then
+  Result := 'reumatologia'
+  else
+  if pCodigo = 'A1.23' then
+  Result := 'tisiopneumologia'
+  else
+  if pCodigo = 'A1.24' then
+  Result := 'traumatologiaOrtopedica'
+  else
+  if pCodigo = 'A1.25' then
+  Result := 'urologia'
+  else
+  if pCodigo = 'A2.' then
+  Result := 'consultaMedProntSoc'
+  else
+  if pCodigo = 'B' then
+  Result := 'outrosAtendAmb'
+  else
+  if pCodigo = 'B1' then
+  Result := 'consultaSessaoFisio'
+  else
+  if pCodigo = 'B2' then
+  Result := 'consultaSessaoFono'
+  else
+  if pCodigo = 'B3' then
+  Result := 'consultaSessaoNutri'
+  else
+  if pCodigo = 'B4' then
+  Result := 'consultaSessaoTerap'
+  else
+  if pCodigo = 'B5' then
+  Result := 'consultaSessaoPsico'
+  else
+  if pCodigo = 'C' then
+  Result := 'exames'
+  else
+  if pCodigo = 'C1.' then
+  Result := 'ressonanciaMagnet'
+  else
+  if pCodigo = 'C2.' then
+  Result := 'tomografiaComputa'
+  else
+  if pCodigo = 'C3.' then
+  Result := 'procedDiagnCitopat'
+  else
+  if pCodigo = 'C4.' then
+  Result := 'densitometriaOssea'
+  else
+  if pCodigo = 'C5.' then
+  Result := 'ecodopplerTranstora'
+  else
+  if pCodigo = 'C6.' then
+  Result := 'broncoscopiabiopsia'
+  else
+  if pCodigo = 'C7.' then
+  Result := 'endoscopiaDigestiva'
+  else
+  if pCodigo = 'C8.' then
+  Result := 'colonoscopia'
+  else
+  if pCodigo = 'C9.' then
+  Result := 'holter24h'
+  else
+  if pCodigo = 'C10.' then
+  Result := 'mamografiaConvDig'
+  else
+  if pCodigo = 'C10.1' then
+  Result := 'mamografia50a69'
+  else
+  if pCodigo = 'C11.' then
+  Result := 'cintilografiaMiocard'
+  else
+  if pCodigo = 'C12.' then
+  Result := 'cintilografiaRenal'
+  else
+  if pCodigo = 'C13.' then
+  Result := 'hemoglobinaGlicada'
+  else
+  if pCodigo = 'C14.' then
+  Result := 'pesqSangueOculto'
+  else
+  if pCodigo = 'C15.' then
+  Result := 'radiografia'
+  else
+  if pCodigo = 'C16.' then
+  Result := 'testeErgometrico'
+  else
+  if pCodigo = 'C17.' then
+  Result := 'ultraSonAbdoTotal'
+  else
+  if pCodigo = 'C18.' then
+  Result := 'ultraSonAbdoInfer'
+  else
+  if pCodigo = 'C19.' then
+  Result := 'ultraSonAbdoSuper'
+  else
+  if pCodigo = 'C20.' then
+  Result := 'ultraSonObstMorfo'
+  else
+  If pCodigo = 'D' then
+  Result := 'terapias'
+  else
+  If pCodigo = 'D1.' then
+  Result := 'transfusaoAmbulatorial'
+  else
+  If pCodigo = 'D2.' then
+  Result := 'quimioSistemica'
+  else
+  If pCodigo = 'D3.' then
+  Result := 'radioterapiaMegavolt'
+  else
+  If pCodigo = 'D4.' then
+  Result := 'hemodialiseAguda'
+  else
+  If pCodigo = 'D5.' then
+  Result := 'hemodialiseCronica'
+  else
+  If pCodigo = 'D6.' then
+  Result := 'implanteDispIntrauterino'
+  else
+  If pCodigo = 'H' then
+  Result := 'demaisDespMedHosp'
+  else
+  If pCodigo = 'E' then
+  Result := 'internacoes'
+  else
+  If pCodigo = 'E1' then
+  Result := 'clinica'
+  else
+  If pCodigo = 'E2' then
+  Result := 'cirurgica'
+  else
+  If pCodigo = 'E2.1' then
+  Result := 'cirurgiaBariatrica'
+  else
+  If pCodigo = 'E2.2' then
+  Result := 'laqueaduraTubaria'
+  else
+  If pCodigo = 'E2.3' then
+  Result := 'vasectomia'
+  else
+  If pCodigo = 'E2.4' then
+  Result := 'fraturaFemur60'
+  else
+  If pCodigo = 'E2.5' then
+  Result := 'revisaoArtroplastia'
+  else
+  If pCodigo = 'E2.6' then
+  Result := 'implanteCdi'
+  else
+  If pCodigo = 'E2.7' then
+  Result := 'implantacaoMarcap'
+  else
+  If pCodigo = 'E3' then
+  Result := 'obstetrica'
+  else
+  If pCodigo = 'E3.1' then
+  Result := 'partoNormal'
+  else
+  If pCodigo = 'E3.2' then
+  Result := 'partoCesareo'
+  else
+  If pCodigo = 'E4' then
+  Result := 'pediatrica'
+  else
+  If pCodigo = 'E4.1' then
+  Result := 'internacaoRespira'
+  else
+  If pCodigo = 'E4.2' then
+  Result := 'internacaoUtiNeo'
+  else
+  If pCodigo = 'E4.2.1' then
+  Result := 'internacoesUtiNeo48'
+  else
+  If pCodigo = 'E5.' then
+  Result := 'psiquiatrica'
+  else
+  If pCodigo = 'F1' then
+  Result := 'neoplasias'
+  else
+  If pCodigo = 'F1.1' then
+  Result := 'cancerMamaFem'
+  else
+  If pCodigo = 'F1.1.1' then
+  Result := 'tratCirurgCancerMam'
+  else
+  If pCodigo = 'F1.2' then
+  Result := 'cancerColoUtero'
+  else
+  If pCodigo = 'F1.2.1' then
+  Result := 'tratCirurgCancerColo'
+  else
+  If pCodigo = 'F1.3' then
+  Result := 'cancerColonReto'
+  else
+  If pCodigo = 'F1.3.1' then
+  Result := 'tratCirurgCancerColoReto'
+  else
+  If pCodigo = 'F1.4' then
+  Result := 'cancerProstata'
+  else
+  If pCodigo = 'F1.4.1' then
+  Result := 'tratCirurgCancerProst'
+  else
+  If pCodigo = 'F2' then
+  Result := 'diabetesMellitus'
+  else
+  If pCodigo = 'F3' then
+  Result := 'doencasAparelhoCirc'
+  else
+  If pCodigo = 'F3.1' then
+  Result := 'infartoAgudoMiocardio'
+  else
+  If pCodigo = 'F3.2' then
+  Result := 'doencasHipertensivas'
+  else
+  If pCodigo = 'F3.3' then
+  Result := 'insuficienciaCardCong'
+  else
+  If pCodigo = 'F3.4' then
+  Result := 'doencasCerebrovasc'
+  else
+  If pCodigo = 'F3.4.1' then
+  Result := 'acidenteVascularCere'
+  else
+  If pCodigo = 'F4' then
+  Result := 'doencasAparelhoResp'
+  else
+  If pCodigo = 'F4.1' then
+  Result := 'doencaPulmoObstrCron'
+  else
+  If pCodigo = 'F5' then
+  Result := 'causasExternas'
+
+
+  else
+  ShowMessage( 'Código não localizado : ' + pCodigo );
+end;
+
+end.

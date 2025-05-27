@@ -1,0 +1,243 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 664
+  ClientWidth = 929
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Verdana'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 32
+    Top = 11
+    Width = 167
+    Height = 13
+    Caption = 'Caminho dos arquivos .PDF :'
+  end
+  object edtDiretorio1: TJvDirectoryEdit
+    Left = 207
+    Top = 8
+    Width = 425
+    Height = 21
+    TabOrder = 0
+    Text = 'edtDiretorio1'
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 144
+    Width = 929
+    Height = 520
+    Align = alBottom
+    TabOrder = 1
+    object lbArquivo: TListBox
+      Left = 1
+      Top = 1
+      Width = 449
+      Height = 518
+      Align = alLeft
+      ItemHeight = 13
+      TabOrder = 0
+      ExplicitHeight = 614
+    end
+    object Memo1: TMemo
+      Left = 456
+      Top = 1
+      Width = 472
+      Height = 518
+      Align = alRight
+      Lines.Strings = (
+        'Memo1')
+      TabOrder = 1
+      ExplicitHeight = 614
+    end
+  end
+  object Button1: TButton
+    Left = 32
+    Top = 40
+    Width = 167
+    Height = 25
+    Caption = 'atualizar lista de arquivo'
+    TabOrder = 2
+    OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 32
+    Top = 71
+    Width = 167
+    Height = 25
+    Caption = 'Gerar rela'#231#227'o'
+    TabOrder = 3
+    OnClick = Button2Click
+  end
+  object conexaoSGU: TFDConnection
+    Params.Strings = (
+      'Database=UNIMEDTSGU'
+      'User_Name=DBAUNIMED'
+      'Password=h_Tm5G3AueI8'
+      'DriverID=Ora')
+    Connected = True
+    LoginPrompt = False
+    Left = 296
+    Top = 40
+  end
+  object FDPhysOracleDriverLink1: TFDPhysOracleDriverLink
+    VendorHome = 'OraClient11g_home1_32bit'
+    Left = 408
+    Top = 40
+  end
+  object qryProcesso: TFDQuery
+    Connection = conexaoSGU
+    SQL.Strings = (
+      'SELECT  BNF.BNF_COD_PESSOA                   AS COD_PESSOA'
+      '        ,LPAD(TRIM(PESDOC.DOC_NRO), 11, '#39'0'#39') AS DOCUMENTO'
+      '        ,TRIM(PESCONT.CON_DES_EMAIL)         AS EMAIL'
+      'FROM    PRCSSO_PARAM_FATURA_REC PRCSSO'
+      '        INNER JOIN FATURA_REC FAT'
+      '            ON FAT.FR_NRO = PRCSSO.FR_NRO'
+      '        INNER JOIN BNFRIO BNF'
+      '            ON  BNF.UNI_COD_RESPON      = FR_COD_RESPON_UNIMED'
+      
+        '            AND BNF.BNF_COD_CNTRAT_CART = FR_COD_CNTRAT_CART_BNF' +
+        'RIO'
+      '            AND BNF.BNF_COD             = FR_COD_BNFRIO'
+      '            AND BNF.BNF_COD_DEPNTE      = FR_COD_DEPNTE_BNFRIO'
+      '        LEFT JOIN PESSOA_END_CONTAT PESCONT'
+      '            ON PESCONT.PES_COD = BNF.BNF_COD_PESSOA'
+      '        INNER JOIN PESSOA_DOC PESDOC'
+      '            ON  PESDOC.PES_COD = BNF.BNF_COD_PESSOA'
+      '            AND TPDOC_COD IN (2, 3)'
+      'WHERE   PRCP_COD = :COD_PROCESSO')
+    Left = 296
+    Top = 88
+    ParamData = <
+      item
+        Name = 'COD_PROCESSO'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
+      end>
+    object qryProcessoCOD_PESSOA: TBCDField
+      FieldName = 'COD_PESSOA'
+      Origin = 'COD_PESSOA'
+      Required = True
+      Precision = 10
+      Size = 0
+    end
+    object qryProcessoDOCUMENTO: TStringField
+      FieldName = 'DOCUMENTO'
+      Origin = 'DOCUMENTO'
+      Size = 11
+    end
+    object qryProcessoEMAIL: TStringField
+      FieldName = 'EMAIL'
+      Origin = 'EMAIL'
+      Size = 70
+    end
+  end
+  object conexao: TFDConnection
+    Params.Strings = (
+      'Database=DBBoletos'
+      'User_Name=postgres'
+      'Password=porcos128'
+      'Server=192.168.14.2'
+      'DriverID=pG')
+    Connected = True
+    LoginPrompt = False
+    Left = 552
+    Top = 48
+  end
+  object qryDelEmail: TFDQuery
+    Connection = conexao
+    SQL.Strings = (
+      'delete from tbemail')
+    Left = 552
+    Top = 104
+  end
+  object FDPhysPgDriverLink1: TFDPhysPgDriverLink
+    VendorHome = 'C:\AGBSoft\projetosOficiais\SisGerencialNET\fonte\Win32\Debug'
+    Left = 32
+    Top = 120
+  end
+  object FDGUIxWaitCursor1: TFDGUIxWaitCursor
+    Provider = 'Forms'
+    Left = 32
+    Top = 160
+  end
+  object qryInsertEmail: TFDQuery
+    Connection = conexao
+    SQL.Strings = (
+      'insert into tbemail'
+      'values(:codpessoa, :email)')
+    Left = 552
+    Top = 160
+    ParamData = <
+      item
+        Name = 'CODPESSOA'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
+      end
+      item
+        Name = 'EMAIL'
+        DataType = ftString
+        ParamType = ptInput
+        Value = Null
+      end>
+  end
+  object qryDelPessoa: TFDQuery
+    Connection = conexao
+    SQL.Strings = (
+      'delete from tbPessoa'
+      '')
+    Left = 648
+    Top = 104
+  end
+  object qryInsertPessoa: TFDQuery
+    Connection = conexao
+    SQL.Strings = (
+      'insert into tbpessoa'
+      'values(:codpessoa, :nome, :documento)')
+    Left = 648
+    Top = 160
+    ParamData = <
+      item
+        Name = 'CODPESSOA'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
+      end
+      item
+        Name = 'NOME'
+        DataType = ftString
+        ParamType = ptInput
+        Value = Null
+      end
+      item
+        Name = 'DOCUMENTO'
+        DataType = ftString
+        ParamType = ptInput
+        Value = Null
+      end>
+  end
+  object qryPessoa: TFDQuery
+    Connection = conexao
+    SQL.Strings = (
+      'select * from tbpessoa'
+      'where codPessoa= :codpessoa')
+    Left = 648
+    Top = 216
+    ParamData = <
+      item
+        Name = 'CODPESSOA'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
+      end>
+  end
+end
